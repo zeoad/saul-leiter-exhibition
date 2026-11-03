@@ -191,21 +191,27 @@ files in `public/images/hero` and `public/images/portraits`.
 
 ## 7. Fonts
 
-The project deliberately does **not** load fonts from a CDN. It uses local-first
-stacks:
+Display and body faces are **self-hosted via `next/font/google`**
+(`Cormorant_Garamond` + `DM_Sans`, configured in `src/app/layout.tsx`). Next
+downloads the WOFF2 files at build time and serves them from
+`/_next/static/media` — there are no runtime requests to any external font
+CDN, and the static export stays offline-capable.
+
+The CSS variables injected by `next/font` (`--font-cormorant`, `--font-dm-sans`)
+are prepended to the token stacks in `globals.css`, so the system-serif
+fallback chain still applies if the variables are ever absent:
 
 ```css
---font-display: "Cormorant Garamond", "Cormorant", "EB Garamond", Garamond,
-  "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
---font-sans: "DM Sans", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+--font-display: var(--font-cormorant, "Cormorant Garamond"), "Cormorant",
+  "EB Garamond", Garamond, "Palatino Linotype", …, serif;
+--font-sans: var(--font-dm-sans, "DM Sans"), "Inter", "Segoe UI", …, sans-serif;
 --font-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC",
   "SimSun", serif;
 ```
 
-This keeps the static build offline-capable and avoids multi-megabyte CJK font
-downloads. To self-host the exact faces, drop licensed WOFF2 files into
-`public/fonts/`, add matching `@font-face` rules at the top of `globals.css`, and
-keep the same family names. `font-display: swap` is recommended.
+Chinese copy intentionally stays on the **system serif stack** — self-hosting
+a full-weight CJK font would add 10MB+ to the first load, which is not worth
+it for an editorial site.
 
 ---
 
@@ -214,7 +220,7 @@ keep the same family names. `font-display: swap` is recommended.
 Requires Node 20+ and npm 10+.
 
 ```bash
-npm install            # install (no new dependencies were added in V2)
+npm install            # install dependencies
 npm run dev            # development server, http://localhost:3000
 npm run typecheck      # tsc --noEmit
 npm run lint           # eslint
@@ -222,6 +228,14 @@ npm run build          # static export → out/
 npm run preview        # serve out/ at http://127.0.0.1:4318
 npm run start          # same as preview (there is no Next.js server runtime)
 ```
+
+`predev`/`prebuild` hooks run `scripts/responsive-images.mjs` (sharp), which
+generates `-480`/`-960`/`-1600` WebP variants next to each source image plus
+`src/generated/image-manifest.json`. The custom `next/image` loader in
+`src/lib/image-loader.ts` maps the framework's srcset widths onto those
+variants, so browsers download a size-appropriate file even though
+`output: "export"` has no runtime image optimizer. Variants are git-ignored;
+the manifest is committed so `npm run typecheck` works standalone.
 
 Optional tooling (no npm packages required):
 
@@ -250,9 +264,53 @@ python scripts/import-real-assets.py
 
 ```ts
 output: "export",
-images: { unoptimized: true },
+images: {
+  loader: "custom",
+  loaderFile: "./src/lib/image-loader.ts",
+  deviceSizes: [480, 768, 960, 1280, 1600, 1920],
+},
 trailingSlash: true,
 ```
+
+### GitHub Pages (CI)
+
+`.github/workflows/ci.yml` runs lint → typecheck → build on every push and
+pull request, uploads `out/` as a Pages artifact, screenshots the main pages
+with headless Chrome (uploaded as the `page-screenshots` artifact for manual
+review), and deploys to GitHub Pages on pushes to `main`.
+
+One-time setup:
+
+1. Repo → **Settings → Pages → Source: GitHub Actions**.
+2. Repo → **Settings → Secrets and variables → Actions → Variables**: add
+   `NEXT_PUBLIC_SITE_URL = https://<user>.github.io` (or your custom domain).
+3. Push to `main`. The `deploy` job publishes `out/`.
+
+If the site lives under a project path (`https://<user>.github.io/<repo>/`),
+set `NEXT_PUBLIC_SITE_URL` accordingly; all routes are relative-safe because
+`trailingSlash: true` emits directory-style URLs.
+
+### Cloudflare Pages
+
+1. Dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
+2. Build settings:
+   - Build command: `npm run build`
+   - Build output directory: `out`
+   - Node version: set env var `NODE_VERSION = 20`
+3. Environment variable: `NEXT_PUBLIC_SITE_URL = https://<project>.pages.dev`
+   (update after binding a custom domain).
+4. Deploy. Every push to the connected branch rebuilds; PR branches get
+   preview URLs automatically.
+
+### Custom domain
+
+- **GitHub Pages:** Settings → Pages → Custom domain → enter the domain, then
+  point a `CNAME` record (apex: `ALIAS`/`ANAME` or the four GitHub `A` records)
+  at `<user>.github.io`. Rebuild so canonicals/OG/sitemap pick up the domain.
+- **Cloudflare Pages:** Custom domains → Set up a domain; if the domain is
+  already on Cloudflare DNS the record is added automatically.
+
+### Plain nginx
 
 Build on the server (or in CI), then serve `out/` with nginx:
 
@@ -325,5 +383,14 @@ dynamic server rendering. All 16 plate routes are generated with
 - The portrait's photographer is not documented in the source deck; the site does
   not attribute it as a self-portrait.
 - The biography is concise by design; it is not a complete exhibition history.
-- Fonts fall back to installed system serifs. Installing licensed WOFF2 files is
-  the only step needed to match the intended typography exactly.
+- Chinese copy renders in system serifs by design (see §7); Latin display and
+  body faces are self-hosted and match the intended typography.
+
+---
+
+## 13. Contributing
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
+`feat:` / `fix:` / `perf:` / `ci:` / `docs:` / `chore:`, optionally scoped
+(e.g. `fix(gallery): …`). CI must be green (`lint`, `typecheck`, `build`)
+before merging; review the `page-screenshots` artifact on visual changes.

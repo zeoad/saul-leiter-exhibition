@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # Public site URL baked into canonical/OG/sitemap at build time.
+  # Override per-repository in Settings → Secrets and variables → Variables.
+  NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://a-quiet-gaze.example' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate responsive image variants + manifest
+        run: node scripts/responsive-images.mjs
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+      - name: Upload static export as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/
+
+      # ubuntu-latest ships Google Chrome; no extra setup action needed.
+      - name: Resolve Chrome binary
+        run: |
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+          "$CHROME_PATH" --version
+
+      - name: Screenshot key pages
+        run: |
+          node scripts/serve-out.mjs &
+          SERVER_PID=$!
+          for i in $(seq 1 40); do
+            curl -sf http://127.0.0.1:4318/ > /dev/null && break
+            sleep 0.5
+          done
+          node scripts/screenshot.mjs --path / --name home --full
+          node scripts/screenshot.mjs --path /work/ --name work --full
+          node scripts/screenshot.mjs --path /work/through-boards/ --name work-detail --full
+          node scripts/screenshot.mjs --path /vision/ --name vision --full
+          node scripts/screenshot.mjs --path /life/ --name life --full
+          node scripts/screenshot.mjs --path /archive/ --name archive --full
+          kill $SERVER_PID || true
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: page-screenshots
+          path: .screenshots/
+          retention-days: 14
+
+  # Opt-in: set repository variable DEPLOY_TO_PAGES=true to publish out/.
+  # NOTE: this only works at a domain root or a Pages *custom* domain.
+  # A project subpath (https://<user>.github.io/<repo>/) needs basePath
+  # in next.config.ts, otherwise /images/... and /_next/... will 404.
+  deploy:
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      vars.DEPLOY_TO_PAGES == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

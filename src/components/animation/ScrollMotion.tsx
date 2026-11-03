@@ -27,47 +27,91 @@ export default function ScrollMotion() {
 
     document.documentElement.classList.add("motion-ready");
 
+    let figureCleanup: (() => void) | undefined;
+
     const ctx = gsap.context(() => {
       /* Image mask reveal -------------------------------------------------- */
-      gsap.utils
-        .toArray<HTMLElement>('[data-reveal="figure"]')
-        .forEach((figure) => {
-          const veil = figure.querySelector<HTMLElement>(".figure__veil");
-          const image = figure.querySelector<HTMLImageElement>(
-            ".figure__media img"
-          );
+      // IntersectionObserver instead of ScrollTrigger: client components like
+      // WorkGallery mount NEW figure nodes after this effect ran (filter
+      // changes, URL-param state), and ScrollTriggers created at mount time
+      // can never reveal those — the veil would stay covering the image.
+      // The MutationObserver below catches figures React inserts later.
+      const revealFigure = (figure: HTMLElement) => {
+        if (figure.dataset.revealed === "true") return;
+        figure.dataset.revealed = "true";
 
-          const timeline = gsap.timeline({
-            scrollTrigger: {
-              trigger: figure,
-              start: "top 88%",
-              once: true,
+        const veil = figure.querySelector<HTMLElement>(".figure__veil");
+        const image = figure.querySelector<HTMLImageElement>(
+          ".figure__media img"
+        );
+
+        const timeline = gsap.timeline();
+
+        if (veil) {
+          timeline.fromTo(
+            veil,
+            { scaleY: 1 },
+            {
+              scaleY: 0,
+              duration: 1.15,
+              ease: "power3.inOut",
+              transformOrigin: "top center",
             },
+            0
+          );
+        }
+
+        if (image) {
+          timeline.fromTo(
+            image,
+            { scale: 1.06 },
+            { scale: 1, duration: 1.7, ease: "power2.out" },
+            0
+          );
+        }
+      };
+
+      const figureObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            figureObserver.unobserve(entry.target);
+            revealFigure(entry.target as HTMLElement);
+          }
+        },
+        // Roughly the old "top 88%" trigger line.
+        { rootMargin: "0px 0px -12% 0px" }
+      );
+
+      const observeFigures = () => {
+        // Figures already at/above the trigger line (fast scroll jumps,
+        // filter re-renders while scrolled down, restored scroll positions)
+        // would never intersect — reveal them immediately instead.
+        const triggerLine = window.innerHeight * 0.88;
+        document
+          .querySelectorAll<HTMLElement>('[data-reveal="figure"]')
+          .forEach((figure) => {
+            if (figure.dataset.revealed === "true") return;
+            if (figure.getBoundingClientRect().top < triggerLine) {
+              revealFigure(figure);
+            } else {
+              figureObserver.observe(figure);
+            }
           });
+      };
 
-          if (veil) {
-            timeline.fromTo(
-              veil,
-              { scaleY: 1 },
-              {
-                scaleY: 0,
-                duration: 1.15,
-                ease: "power3.inOut",
-                transformOrigin: "top center",
-              },
-              0
-            );
-          }
+      observeFigures();
 
-          if (image) {
-            timeline.fromTo(
-              image,
-              { scale: 1.06 },
-              { scale: 1, duration: 1.7, ease: "power2.out" },
-              0
-            );
-          }
-        });
+      const mutationObserver = new MutationObserver(observeFigures);
+      mutationObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      figureCleanup = () => {
+        figureObserver.disconnect();
+        mutationObserver.disconnect();
+      };
 
       /* Text reveal -------------------------------------------------------- */
       gsap.utils
@@ -160,6 +204,7 @@ export default function ScrollMotion() {
     return () => {
       window.clearTimeout(refreshTimer);
       window.removeEventListener("load", onLoad);
+      figureCleanup?.();
       ctx.revert();
       ScrollTrigger.refresh();
     };

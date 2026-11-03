@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 
 import "./globals.css";
 import ArtworkLightbox from "@/components/gallery/ArtworkLightbox";
@@ -11,6 +12,28 @@ import {
   SITE_NAME,
   SITE_URL,
 } from "@/lib/metadata";
+
+/**
+ * Self-hosted via next/font: downloaded at build time, served from
+ * /_next/static/media — no runtime request to any external font CDN.
+ * Chinese copy intentionally stays on the system serif stack (see
+ * --font-cn in globals.css) to avoid shipping a 10MB+ CJK webfont.
+ */
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -81,7 +104,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hans">
+    <html lang="zh-Hans" className={`${cormorant.variable} ${dmSans.variable}`}>
       <body id="top">
         <a className="skip-link" href="#main">
           跳到主要内容

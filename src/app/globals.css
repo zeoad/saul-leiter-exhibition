@@ -25,10 +25,13 @@
   --color-mist: #c8c5b9;
   --color-deep-teal: #52605e;
 
-  --font-display: "Cormorant Garamond", "Cormorant", "EB Garamond", Garamond,
-    "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
-  --font-sans: "DM Sans", "Inter", "Segoe UI", "Helvetica Neue", Arial,
-    sans-serif;
+  /* next/font (self-hosted at build) injects --font-cormorant/--font-dm-sans
+     on <html>; the var() fallback keeps the static stack if ever absent. */
+  --font-display: var(--font-cormorant, "Cormorant Garamond"), "Cormorant",
+    "EB Garamond", Garamond, "Palatino Linotype", "Book Antiqua", Georgia,
+    "Times New Roman", serif;
+  --font-sans: var(--font-dm-sans, "DM Sans"), "Inter", "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
   --font-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC",
     "SimSun", serif;
 
