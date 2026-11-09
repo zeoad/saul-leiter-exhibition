@@ -10,6 +10,8 @@
  *   node scripts/deploy.mjs --build                  # rebuild, then upload
  *   node scripts/deploy.mjs                          # upload the current out/
  *   node scripts/deploy.mjs --host 1.2.3.4 --user root --path /var/www/saul-leiter
+ *   node scripts/deploy.mjs --user ubuntu --sudo     # passwordless sudo for a
+ *                                                    # root-owned web root
  *
  * Connection details may also live in deploy.config.json (gitignored):
  *   { "host": "", "user": "root", "path": "/var/www/saul-leiter", "port": 22 }
@@ -39,6 +41,7 @@ const user = arg("user") ?? saved.user ?? "root";
 const remotePath = arg("path") ?? saved.path;
 const port = String(arg("port") ?? saved.port ?? 22);
 const shouldBuild = arg("build") !== undefined;
+const useSudo = arg("sudo") !== undefined || saved.sudo === true;
 
 if (!host || !remotePath) {
   console.error(
@@ -63,7 +66,9 @@ const run = (command, args, extra = {}) => {
 
 if (shouldBuild) {
   console.log("→ 构建静态站点");
-  run("npm", ["run", "build"], { shell: true });
+  /* One shell string instead of args: Node deprecates shell+args because the
+     arguments would be concatenated unescaped. */
+  run("npm run build", [], { shell: true });
 }
 
 if (!fs.existsSync(path.join(outDir, "index.html"))) {
@@ -79,19 +84,20 @@ console.log("→ 打包 out/");
 run("tar", ["-czf", tarball, "-C", outDir, "."]);
 
 const target = `${user}@${host}`;
-const sshOptions = [
-  "-p",
-  port,
+/* scp spells the port flag differently from ssh, so keep it out of the shared set. */
+const sharedOptions = [
   "-o",
   "StrictHostKeyChecking=accept-new",
   "-o",
   "ConnectTimeout=15",
 ];
+const sshOptions = ["-p", port, ...sharedOptions];
+const scpOptions = ["-P", port, ...sharedOptions];
 
 try {
   const size = (fs.statSync(tarball).size / 1024 / 1024).toFixed(1);
   console.log(`→ 上传 ${size} MB 到 ${target}:${remoteTarball}`);
-  run("scp", [...sshOptions, tarball, `${target}:${remoteTarball}`]);
+  run("scp", [...scpOptions, tarball, `${target}:${remoteTarball}`]);
 
   console.log(`→ 服务器端解压并切换 ${remotePath}`);
   const script = `
@@ -107,12 +113,19 @@ test -f "$STAGE/index.html"
 rm -rf "$PREV"
 if [ -d "$TARGET" ]; then mv "$TARGET" "$PREV"; fi
 mv "$STAGE" "$TARGET"
-chmod -R a+rX "$TARGET"
+# Windows 的 tar 会写入 777，收紧成"所有者可写、其他人只读"
+chmod -R u=rwX,go=rX "$TARGET"
 rm -f ${quote(remoteTarball)}
 du -sh "$TARGET"
 `;
 
-  run("ssh", [...sshOptions, target, "bash", "-s"], { input: script });
+  run(
+    "ssh",
+    [...sshOptions, target, useSudo ? "sudo" : "bash", "-s"],
+    /* stdin must be a pipe: with "inherit" the remote script would never arrive
+       and ssh would sit waiting for input forever. */
+    { input: script, stdio: ["pipe", "inherit", "inherit"] }
+  );
 } finally {
   fs.rmSync(tarball, { force: true });
 }
