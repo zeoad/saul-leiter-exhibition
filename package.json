@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit",
     "preview": "node scripts/serve-out.mjs",
     "screenshots": "node scripts/screenshot.mjs",
+    "deploy": "node scripts/deploy.mjs --build",
+    "deploy:only": "node scripts/deploy.mjs",
     "assets:images": "python scripts/import-real-assets.py"
   },
   "dependencies": {
