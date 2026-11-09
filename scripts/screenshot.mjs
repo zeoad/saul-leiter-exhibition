@@ -36,6 +36,9 @@ const full = Boolean(arg("full", false));
 const sectionsArg = arg("sections", null);
 const evalExpr = arg("eval", null);
 const viewportShot = Boolean(arg("viewport", false));
+const motion = Boolean(arg("motion", false));
+const delay = Number(arg("delay", 0));
+const hoverSelector = arg("hover", null);
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -149,7 +152,12 @@ async function main() {
       mobile: width < 768,
     });
     await cdp.send("Emulation.setEmulatedMedia", {
-      features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+      features: [
+        {
+          name: "prefers-reduced-motion",
+          value: motion ? "no-preference" : "reduce",
+        },
+      ],
     });
 
     await cdp.send("Page.navigate", { url });
@@ -209,6 +217,11 @@ async function main() {
 
     const label = `${name}-${width}`;
 
+    if (delay > 0) {
+      console.log(`Waiting ${delay}ms for motion…`);
+      await sleep(delay);
+    }
+
     if (evalExpr) {
       const result = await cdp.send("Runtime.evaluate", {
         expression: String(evalExpr),
@@ -217,6 +230,43 @@ async function main() {
       });
       console.log(`Eval: ${JSON.stringify(result.result?.value ?? null).slice(0, 300)}`);
       await sleep(900);
+    }
+
+    if (hoverSelector) {
+      const probe = await cdp.send("Runtime.evaluate", {
+        expression: `(() => {
+          const el = document.querySelector(${JSON.stringify(String(hoverSelector))});
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return {
+            x: Math.round(r.left + r.width / 2),
+            y: Math.round(r.top + Math.min(14, r.height / 3)),
+          };
+        })()`,
+        returnByValue: true,
+      });
+
+      const point = probe.result.value;
+      if (!point) {
+        console.warn(`Hover target not found: ${hoverSelector}`);
+      } else {
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mouseMoved",
+          x: point.x,
+          y: Math.max(2, point.y - 40),
+          buttons: 0,
+          pointerType: "mouse",
+        });
+        await sleep(250);
+        await cdp.send("Input.dispatchMouseEvent", {
+          type: "mouseMoved",
+          x: point.x,
+          y: point.y,
+          buttons: 0,
+          pointerType: "mouse",
+        });
+        await sleep(800);
+      }
     }
 
     if (viewportShot) {
@@ -320,6 +370,24 @@ async function main() {
         (event.method === "Runtime.consoleAPICalled" &&
           event.params?.type === "error")
     );
+
+    const warnings = cdp.events.filter(
+      (event) =>
+        (event.method === "Log.entryAdded" &&
+          event.params?.entry?.level === "warning") ||
+        (event.method === "Runtime.consoleAPICalled" &&
+          event.params?.type === "warning")
+    );
+
+    if (warnings.length) {
+      console.log(`\n${warnings.length} console warning(s):`);
+      for (const warning of warnings.slice(0, 12)) {
+        const text =
+          warning.params?.entry?.text ??
+          warning.params?.args?.map((item) => item.value ?? item.description).join(" ");
+        console.log(String(text).slice(0, 240));
+      }
+    }
 
     if (errors.length) {
       console.log(`\n${errors.length} runtime error(s):`);

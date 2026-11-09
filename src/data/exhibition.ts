@@ -40,6 +40,30 @@ export const homeChapters: HomeChapter[] = [
   { id: "closing", number: "11", label: "CLOSING", title: "Look Again" },
 ];
 
+/**
+ * THE ART OF SEEING — the seven exhibition scenes. Each maps to a section
+ * anchor on the home page (or a route for the archive); the scene index
+ * overlay and its scroll-spy read this list.
+ */
+export interface Scene {
+  id: string;
+  number: string;
+  label: string;
+  title: string;
+  /** Section anchor on `/`, or a route path. */
+  target: string;
+}
+
+export const homeScenes: Scene[] = [
+  { id: "cover", number: "01", label: "THE COVER", title: "Enter the Exhibition", target: "#cover" },
+  { id: "window", number: "02", label: "A WINDOW", title: "A Window Between Us", target: "#behind-the-glass" },
+  { id: "colors", number: "03", label: "THE COLORS", title: "The Language of Color", target: "#color" },
+  { id: "photographs", number: "04", label: "PHOTOGRAPHS", title: "A Collection of Moments", target: "#selected-works" },
+  { id: "moment", number: "05", label: "THE MOMENT", title: "A Life Through Time", target: "#life" },
+  { id: "archive", number: "06", label: "THE ARCHIVE", title: "The Photographic Archive", target: "/archive/" },
+  { id: "exit", number: "07", label: "THE EXIT", title: "The End Is Another Beginning", target: "#closing" },
+];
+
 export const colorObservations = [
   {
     name: "VERMILION",

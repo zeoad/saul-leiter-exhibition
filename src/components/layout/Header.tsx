@@ -5,138 +5,166 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import Directory from "@/components/layout/Directory";
 import { navLinks } from "@/data/exhibition";
 import { startScroll, stopScroll } from "@/lib/lenis";
+import { openViewfinder } from "@/lib/viewfinder";
 
+/**
+ * THE MASTHEAD — a thin register that blends with whatever is behind it.
+ * Because it is painted in `difference`, it stays legible over the dark
+ * cover, the paper gallery and the photographs without ever changing colour.
+ */
 export default function Header() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const toggleRef = useRef<HTMLButtonElement>(null);
-  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [directoryOpen, setDirectoryOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
 
   const closeMenu = useCallback(() => {
-    setOpen(false);
-    window.setTimeout(() => toggleRef.current?.focus(), 80);
+    setMenuOpen(false);
+    window.setTimeout(() => menuButtonRef.current?.focus(), 80);
   }, []);
 
   const isHome = pathname === "/";
-  const isOverlay = isHome && !scrolled && !open;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48);
-    onScroll();
+    setMenuOpen(false);
+    setDirectoryOpen(false);
+    setHidden(false);
+  }, [pathname]);
+
+  /* The masthead retreats while reading, returns the moment you scroll back. */
+  useEffect(() => {
+    let last = window.scrollY;
+    let frame = 0;
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const y = window.scrollY;
+        const delta = y - last;
+        last = y;
+
+        if (y < 120) setHidden(false);
+        else if (delta > 8) setHidden(true);
+        else if (delta < -8) setHidden(false);
+      });
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    if (menuOpen || directoryOpen) setHidden(false);
+  }, [menuOpen, directoryOpen]);
 
   useEffect(() => {
-    const backgroundRegions = Array.from(
-      document.querySelectorAll<HTMLElement>("main, .site-footer")
-    );
+    if (!menuOpen) return;
 
-    if (open) {
-      stopScroll();
-      document.documentElement.classList.add("menu-open");
-      backgroundRegions.forEach((region) => region.setAttribute("inert", ""));
-      window.setTimeout(() => firstLinkRef.current?.focus(), 120);
-    } else {
-      startScroll();
-      document.documentElement.classList.remove("menu-open");
-      backgroundRegions.forEach((region) => region.removeAttribute("inert"));
-    }
+    stopScroll();
+    document.documentElement.classList.add("menu-open");
+    const timer = window.setTimeout(() => firstMenuLinkRef.current?.focus(), 180);
 
     return () => {
+      window.clearTimeout(timer);
       startScroll();
       document.documentElement.classList.remove("menu-open");
-      backgroundRegions.forEach((region) => region.removeAttribute("inert"));
     };
-  }, [open]);
+  }, [menuOpen]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeMenu();
     };
-    const onResize = () => {
-      if (window.innerWidth >= 768) setOpen(false);
-    };
-
     window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("resize", onResize);
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [closeMenu]);
 
   return (
     <>
       <header
-        className={[
-          "site-header",
-          isOverlay ? "is-overlay" : "",
-          scrolled ? "is-solid" : "",
-          open ? "is-menu-open" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        inert={open ? true : undefined}
+        className="masthead"
+        data-hidden={hidden}
+        onFocusCapture={() => setHidden(false)}
       >
-        <div className="site-header__inner">
+        <div className="masthead__inner">
           <Link
+            className="masthead__brand"
             href="/"
-            className="brand"
             aria-label="SAUL LEITER — A QUIET GAZE, 返回首页"
           >
-            <span className="brand__name" lang="en">
-              SAUL LEITER
+            <span className="masthead__brand-name" lang="en">
+              Saul Leiter
             </span>
-            <span className="brand__sub" lang="en">
-              A Quiet Gaze
+            <span className="masthead__brand-sub" lang="en">
+              A Quiet Gaze · 2026
             </span>
           </Link>
 
-          <nav className="nav" aria-label="主导航">
-            <ul className="nav__list">
-              {navLinks.map((link) => {
-                const active =
-                  pathname === link.href ||
-                  (link.href !== "/" && pathname.startsWith(link.href));
+          <nav className="masthead__nav" aria-label="主导航">
+            {navLinks.map((link) => {
+              const active =
+                pathname === link.href ||
+                (link.href !== "/" && pathname.startsWith(link.href));
 
-                return (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="nav__link"
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className="nav__index" aria-hidden="true">
-                        {link.index}
-                      </span>
-                      {link.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="masthead__link"
+                  aria-current={active ? "page" : undefined}
+                >
+                  <i aria-hidden="true">{link.index}</i>
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
-          <div className="header-meta">
-            <span className="header-meta__item">2026 EDITION</span>
+          <div className="masthead__actions">
+            {isHome ? (
+              <button
+                type="button"
+                className="masthead__action masthead__action--vf"
+                onClick={openViewfinder}
+                data-cursor="link"
+                data-cursor-label="FIND"
+                aria-label="打开取景器游戏"
+              >
+                <span lang="en">VF</span>
+              </button>
+            ) : null}
+
             <button
-              ref={toggleRef}
               type="button"
-              className="menu-toggle"
-              aria-expanded={open}
-              aria-controls="site-menu"
-              aria-label={open ? "关闭菜单" : "打开菜单"}
-              onClick={() => setOpen((value) => !value)}
+              className="masthead__action"
+              onClick={() => setDirectoryOpen(true)}
+              data-cursor="link"
+              data-cursor-label="INDEX"
+              aria-haspopup="dialog"
+              aria-controls="exhibition-directory"
             >
-              {open ? (
+              <span lang="en">INDEX</span>
+            </button>
+
+            <button
+              ref={menuButtonRef}
+              type="button"
+              className="masthead__menu"
+              aria-label={menuOpen ? "关闭菜单" : "打开菜单"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen((value) => !value)}
+            >
+              {menuOpen ? (
                 <X aria-hidden="true" strokeWidth={1.5} />
               ) : (
                 <Menu aria-hidden="true" strokeWidth={1.5} />
@@ -146,74 +174,54 @@ export default function Header() {
         </div>
       </header>
 
+      <Directory open={directoryOpen} onClose={() => setDirectoryOpen(false)} />
+
       <div
-        id="site-menu"
-        className="menu-overlay"
-        data-open={open}
-        aria-hidden={!open}
-        inert={!open ? true : undefined}
+        id="mobile-menu"
+        className="mobile-menu"
+        data-open={menuOpen}
+        aria-hidden={!menuOpen}
+        inert={!menuOpen ? true : undefined}
       >
-        <div className="menu-overlay__bar">
+        <p className="mobile-menu__label" lang="en">
+          INDEX / 2026 — AN INDEPENDENT EXHIBITION
+        </p>
+
+        <nav className="mobile-menu__list" aria-label="移动端导航">
           <Link
             href="/"
-            className="menu-overlay__brand"
+            ref={firstMenuLinkRef}
+            className="mobile-menu__link"
             onClick={closeMenu}
-            aria-label="SAUL LEITER — A QUIET GAZE, 返回首页"
+            aria-current={pathname === "/" ? "page" : undefined}
+            lang="en"
           >
-            <span lang="en">SAUL LEITER</span>
-            <span className="menu-overlay__brand-sub">A QUIET GAZE</span>
+            <i>00</i>
+            <span>Home</span>
           </Link>
 
-          <button
-            type="button"
-            className="menu-overlay__close"
-            aria-label="关闭菜单"
-            onClick={closeMenu}
-          >
-            <X aria-hidden="true" strokeWidth={1.5} />
-          </button>
-        </div>
-
-        <nav aria-label="移动端导航">
-          <p className="meta" style={{ color: "rgba(234,230,222,.45)" }}>
-            INDEX / 2026
-          </p>
-          <ul className="menu-overlay__list">
-            <li>
-              <Link
-                href="/"
-                ref={firstLinkRef}
-                className="menu-overlay__link"
-                aria-current={pathname === "/" ? "page" : undefined}
-                onClick={closeMenu}
-              >
-                <span className="menu-overlay__index">00</span>
-                <span lang="en">Home</span>
-              </Link>
-            </li>
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="menu-overlay__link"
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  onClick={closeMenu}
-                >
-                  <span className="menu-overlay__index">{link.index}</span>
-                  <span lang="en">
-                    {link.label
-                      .replace("THE ", "")
-                      .replace(/^./, (char) => char.toUpperCase())}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="mobile-menu__link"
+              onClick={closeMenu}
+              aria-current={pathname === link.href ? "page" : undefined}
+              lang="en"
+            >
+              <i>{link.index}</i>
+              <span>
+                {link.label
+                  .replace("THE ", "")
+                  .replace(/^./, (char) => char.toUpperCase())}
+              </span>
+            </Link>
+          ))}
         </nav>
 
-        <div className="menu-overlay__foot">
+        <div className="mobile-menu__foot">
           <span>SAUL LEITER · 1923—2013</span>
-          <span>AN INDEPENDENT EDITORIAL EXHIBITION</span>
+          <span>NEW YORK / ONLINE</span>
         </div>
       </div>
     </>

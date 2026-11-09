@@ -1,0 +1,953 @@
+/* ==========================================================================
+   A QUIET GAZE — 05 · CHROME
+   The layer that is always there: masthead, chapter marks, cursor,
+   transition veil, grain, projector light, footer, directory.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Site masthead — blends with whatever is underneath
+   -------------------------------------------------------------------------- */
+
+.masthead {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  height: var(--header-h);
+  mix-blend-mode: difference;
+  color: #f4efe4;
+  pointer-events: none;
+  transition: transform 0.55s var(--ease-out);
+  will-change: transform;
+}
+
+.masthead[data-hidden="true"] {
+  transform: translateY(-105%);
+}
+
+.masthead__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  height: 100%;
+  padding-inline: var(--gutter);
+}
+
+.masthead__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  pointer-events: auto;
+  line-height: 1.1;
+}
+
+.masthead__brand-name {
+  font-family: var(--ff-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+}
+
+.masthead__brand-sub {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  opacity: 0.72;
+  text-transform: uppercase;
+}
+
+.masthead__nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 2.4vw, 2.6rem);
+  pointer-events: auto;
+}
+
+.masthead__link {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  padding-block: 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.82;
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+
+.masthead__link i {
+  font-style: normal;
+  font-size: 0.5rem;
+  opacity: 0.45;
+}
+
+.masthead__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease-cinema);
+}
+
+.masthead__link:hover,
+.masthead__link[aria-current="page"] {
+  opacity: 1;
+}
+
+.masthead__link:hover::after,
+.masthead__link[aria-current="page"]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.masthead__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.masthead__action {
+  padding: 0.5em 0.8em;
+  border: 1px solid rgba(244, 239, 228, 0.32);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transition: background var(--t-fast) var(--ease-out), color var(--t-fast);
+}
+
+.masthead__action:hover {
+  background: #f4efe4;
+  color: #0a0b0a;
+}
+
+.masthead__menu {
+  display: none;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(244, 239, 228, 0.32);
+}
+
+.masthead__menu svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1023px) {
+  .masthead__nav {
+    display: none;
+  }
+
+  .masthead__menu {
+    display: grid;
+  }
+
+  .masthead__action--vf {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Mobile menu — a paper curtain over the whole screen
+   -------------------------------------------------------------------------- */
+
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--header-h) + 2rem) var(--gutter) 2rem;
+  background: var(--screen);
+  color: var(--cream);
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition: clip-path 0.75s var(--ease-cinema), visibility 0s linear 0.75s;
+}
+
+.mobile-menu[data-open="true"] {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+  transition: clip-path 0.75s var(--ease-cinema), visibility 0s;
+}
+
+.mobile-menu__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.3em;
+  color: var(--ash-light);
+  margin-bottom: 2rem;
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.mobile-menu__link {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 0.55rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.mobile-menu__link i {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--red-soft);
+}
+
+.mobile-menu__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--ash-light);
+}
+
+/* --------------------------------------------------------------------------
+   3. Custom cursor
+   -------------------------------------------------------------------------- */
+
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 500;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  pointer-events: none;
+  display: none;
+  place-items: center;
+  border: 1px solid rgba(244, 239, 228, 0.9);
+  border-radius: 50%;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+.cursor__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(244, 239, 228, 0.95);
+  transition: opacity var(--t-fast) linear;
+}
+
+.cursor__label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 10px);
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.26em;
+  white-space: nowrap;
+  color: rgba(244, 239, 228, 0.95);
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+
+.cursor[data-mode="link"] {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+}
+
+.cursor[data-mode="link"] .cursor__dot,
+.cursor[data-mode="view"] .cursor__dot,
+.cursor[data-mode="drag"] .cursor__dot {
+  opacity: 0;
+}
+
+.cursor[data-mode="view"],
+.cursor[data-mode="drag"] {
+  width: 86px;
+  height: 86px;
+  margin: -43px 0 0 -43px;
+  background: rgba(244, 239, 228, 0.12);
+}
+
+.cursor[data-mode="view"] .cursor__label,
+.cursor[data-mode="drag"] .cursor__label,
+.cursor[data-mode="link"] .cursor__label {
+  opacity: 1;
+}
+
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button,
+html.has-cursor [data-cursor] {
+  cursor: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Page transition — a film gate closes over the screen
+   -------------------------------------------------------------------------- */
+
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.veil[data-phase="out"],
+.veil[data-phase="in"] {
+  visibility: visible;
+}
+
+.veil__panel {
+  position: absolute;
+  inset: 0;
+  background: var(--screen);
+  transform: scaleY(0);
+}
+
+.veil__panel--top {
+  transform-origin: top center;
+}
+
+.veil__panel--bottom {
+  transform-origin: bottom center;
+}
+
+.veil__inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--cream);
+}
+
+.veil__word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  opacity: 0;
+}
+
+.veil__word span:first-child {
+  font-family: var(--ff-display);
+  font-size: clamp(2rem, 5vw, 4rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.veil__word span:last-child {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.36em;
+  color: var(--ash-light);
+}
+
+.veil__bar {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 46px;
+  height: 1px;
+  background: var(--red);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: left center;
+}
+
+.veil__sprocket {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(236, 230, 217, 0.22) 0 9px,
+    transparent 9px 22px
+  );
+  opacity: 0;
+}
+
+.veil__sprocket--top {
+  top: 26px;
+}
+
+.veil__sprocket--bottom {
+  bottom: 26px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Fixed atmosphere: grain, vignette, projector light
+   -------------------------------------------------------------------------- */
+
+.fx-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.fx-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 100% at 50% 45%,
+    transparent 55%,
+    rgba(6, 7, 6, 0.22) 100%
+  );
+  opacity: 0.85;
+}
+
+.fx-projector {
+  position: fixed;
+  inset: 0;
+  z-index: 57;
+  pointer-events: none;
+  background: radial-gradient(
+    34vw 34vw at var(--px, 50%) var(--py, 40%),
+    rgba(255, 226, 178, 0.14),
+    rgba(255, 226, 178, 0.05) 34%,
+    transparent 68%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.8;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .fx-projector {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Chapter marks — a quiet vertical register on the right edge
+   -------------------------------------------------------------------------- */
+
+.chapter-marks {
+  position: fixed;
+  right: clamp(0.9rem, 1.8vw, 1.6rem);
+  top: 50%;
+  z-index: 95;
+  transform: translateY(-50%);
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.chapter-marks[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chapter-marks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-end;
+}
+
+.chapter-marks__item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  height: 10px;
+}
+
+.chapter-marks__label {
+  font-family: var(--font-mono);
+  font-size: 0.46875rem;
+  letter-spacing: 0.22em;
+  color: var(--fg-muted);
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity var(--t-mid) var(--ease-out),
+    transform var(--t-mid) var(--ease-out);
+  white-space: nowrap;
+}
+
+.chapter-marks__tick {
+  width: 14px;
+  height: 1px;
+  background: var(--fg-muted);
+  opacity: 0.45;
+  transition: width var(--t-mid) var(--ease-out),
+    opacity var(--t-mid) var(--ease-out), background var(--t-mid);
+}
+
+.chapter-marks__item[data-active="true"] .chapter-marks__label {
+  opacity: 1;
+  transform: none;
+  color: var(--fg);
+}
+
+.chapter-marks__item[data-active="true"] .chapter-marks__tick {
+  width: 34px;
+  opacity: 1;
+  background: var(--accent);
+}
+
+.chapter-marks:hover .chapter-marks__label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 1023px) {
+  .chapter-marks {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Directory overlay — the whole exhibition in one list
+   -------------------------------------------------------------------------- */
+
+.directory {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: var(--screen);
+  color: var(--cream);
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s var(--ease-cinema), visibility 0s linear 0.8s;
+}
+
+.directory[data-open="true"] {
+  visibility: visible;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.8s var(--ease-cinema), visibility 0s;
+}
+
+.directory__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: calc(var(--header-h) + 1.5rem) var(--gutter) 2rem;
+}
+
+.directory__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.directory__head h2 {
+  font-family: var(--ff-display);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.directory__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.directory__close:hover {
+  background: var(--cream);
+  color: var(--screen);
+}
+
+.directory__close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.directory__list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.directory__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding-block: clamp(0.45rem, 1.2vh, 0.9rem);
+  border-bottom: 1px solid var(--line);
+  color: var(--cream);
+  transition: color var(--t-mid) var(--ease-out),
+    padding-left var(--t-mid) var(--ease-out);
+}
+
+.directory__row:hover,
+.directory__row:focus-visible {
+  color: var(--red-soft);
+  padding-left: 0.75rem;
+}
+
+.directory__row i {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: var(--ash-light);
+}
+
+.directory__row-title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.5rem, 3.4vw, 2.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+.directory__row-cn {
+  font-family: var(--ff-cn);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  color: var(--ash-light);
+}
+
+.directory__preview {
+  position: fixed;
+  z-index: 182;
+  width: 22vw;
+  aspect-ratio: 3 / 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+  overflow: hidden;
+  border: 1px solid rgba(236, 230, 217, 0.25);
+}
+
+.directory__preview[data-show="true"] {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.directory__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.directory__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--ash-light);
+}
+
+@media (max-width: 767px) {
+  .directory__inner {
+    padding-top: calc(var(--header-h) + 0.5rem);
+  }
+
+  .directory__list {
+    justify-content: flex-start;
+    padding-top: 1rem;
+  }
+
+  .directory__row {
+    grid-template-columns: 2rem 1fr;
+    gap: 0.9rem;
+  }
+
+  .directory__row-cn {
+    display: none;
+  }
+
+  .directory__preview {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  position: relative;
+  z-index: 10;
+  background: var(--screen);
+  color: var(--cream);
+  padding-block: clamp(4rem, 8vw, 8rem) 2rem;
+  overflow: clip;
+}
+
+.site-footer__word {
+  display: block;
+  margin-bottom: clamp(2.5rem, 5vw, 5rem);
+  font-family: var(--ff-display);
+  font-size: clamp(3.4rem, 11vw, 12rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  color: var(--cream);
+}
+
+.site-footer__word em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--red-soft);
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: 2.4fr 1fr 1fr 2fr;
+  gap: clamp(1.5rem, 3vw, 3.5rem);
+  padding-block: clamp(2rem, 4vw, 3.5rem);
+  border-top: 1px solid var(--line);
+}
+
+.footer-col__head {
+  margin-bottom: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.26em;
+  color: var(--red-soft);
+  text-transform: uppercase;
+}
+
+.footer-col__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.footer-col__link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream-2);
+  transition: color var(--t-fast);
+}
+
+.footer-col__link:hover {
+  color: var(--cream);
+}
+
+.footer-col__link i {
+  font-style: normal;
+  color: var(--ash-light);
+}
+
+.footer-statement {
+  font-family: var(--ff-cn);
+  font-size: 0.875rem;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+  color: var(--cream-2);
+  max-width: 26em;
+}
+
+.footer-note {
+  margin-top: 1rem;
+  font-size: 0.6875rem;
+  line-height: 1.8;
+  color: var(--ash-light);
+}
+
+.footer-note a {
+  color: var(--cream-2);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.site-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+  color: var(--ash-light);
+  text-transform: uppercase;
+}
+
+.site-footer__bottom a:hover {
+  color: var(--cream);
+}
+
+@media (max-width: 1023px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer-col--statement {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Marquee + film strip helpers
+   -------------------------------------------------------------------------- */
+
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  border-block: 1px solid var(--line);
+  padding-block: 0.9rem;
+}
+
+.marquee__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+  animation: marquee 38s linear infinite;
+}
+
+.marquee[data-reverse="true"] .marquee__track {
+  animation-direction: reverse;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__item {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.marquee__item b {
+  font-family: var(--ff-display);
+  font-weight: 400;
+  font-size: 1.35rem;
+  letter-spacing: 0;
+  color: var(--fg);
+  margin-right: 0.6rem;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.sprockets {
+  height: 14px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--line-strong) 0 9px,
+    transparent 9px 24px
+  );
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------------------
+   10. Preserved game masks
+   -------------------------------------------------------------------------- */
+
+html.vf-open .masthead,
+html.vf-open .little-camera,
+html.vf-open .site-footer {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+html.menu-open,
+html.menu-open body {
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   11. PhotoSwipe — the room goes dark around a single print
+   -------------------------------------------------------------------------- */
+
+.pswp {
+  --pswp-bg: #0b0c0b;
+  --pswp-icon-color: #ece6d9;
+  --pswp-icon-color-secondary: #0b0c0b;
+}
+
+.pswp__bg {
+  background: #0b0c0b;
+}
+
+.pswp-aqg-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  z-index: 40;
+  transform: translateX(-50%);
+  width: min(80vw, 720px);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  line-height: 1.8;
+  text-transform: uppercase;
+  color: rgba(236, 230, 217, 0.72);
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .pswp-aqg-caption {
+    bottom: 18px;
+    width: 88vw;
+    font-size: 0.5rem;
+    line-height: 1.7;
+  }
+}
+

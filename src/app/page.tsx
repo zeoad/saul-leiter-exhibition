@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import IntroSequence from "@/components/animation/IntroSequence";
 import ChapterRail from "@/components/layout/ChapterRail";
 import BehindGlass from "@/components/home/BehindGlass";
 import Closing from "@/components/home/Closing";
@@ -47,6 +48,7 @@ const jsonLd = {
 export default function HomePage() {
   return (
     <>
+      <IntroSequence />
       <ChapterRail />
 
       <script

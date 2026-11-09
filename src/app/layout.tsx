@@ -1,11 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 
 import "./globals.css";
 import ArtworkLightbox from "@/components/gallery/ArtworkLightbox";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import ScrollMotion from "@/components/animation/ScrollMotion";
+import LittleCamera from "@/components/interaction/LittleCamera";
+import Viewfinder from "@/components/interaction/Viewfinder";
+import Cursor from "@/components/interaction/Cursor";
+import PageVeil from "@/components/animation/PageVeil";
+import ScrollBus from "@/components/animation/ScrollBus";
 import SmoothScroll from "@/components/animation/SmoothScroll";
 import {
   SITE_DESCRIPTION,
@@ -32,6 +36,14 @@ const dmSans = DM_Sans({
   weight: ["400", "500", "700"],
   style: ["normal", "italic"],
   variable: "--font-dm-sans",
+  display: "swap",
+});
+
+/* Numbers, plate indices, timestamps, technical annotations */
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
@@ -94,7 +106,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#EAE6DE",
+  themeColor: "#EFE9DD",
   colorScheme: "light",
 };
 
@@ -104,18 +116,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hans" className={`${cormorant.variable} ${dmSans.variable}`}>
+    <html
+      lang="zh-Hans"
+      className={`${cormorant.variable} ${dmSans.variable} ${plexMono.variable}`}
+      /* Browser extensions (Trancy, Grammarly, …) inject attributes onto
+         <html> before React hydrates; this keeps that from surfacing as a
+         hydration error. Our own markup stays fully deterministic. */
+      suppressHydrationWarning
+    >
       <body id="top">
         <a className="skip-link" href="#main">
           跳到主要内容
         </a>
 
         <SmoothScroll>
+          <ScrollBus />
           <Header />
           <main id="main">{children}</main>
           <Footer />
-          <ScrollMotion />
           <ArtworkLightbox />
+          <Cursor />
+          <PageVeil />
+          <LittleCamera />
+          <Viewfinder />
         </SmoothScroll>
       </body>
     </html>

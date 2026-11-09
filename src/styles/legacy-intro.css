@@ -1,0 +1,357 @@
+﻿/* ================================================================
+   PRESERVED — OPENING SEQUENCE (film wall intro)
+   ================================================================ */
+
+/* ================================================================
+   OPENING SEQUENCE — film strips travel across the wall, the title
+   flickers on over the moving archive.
+   ================================================================ */
+
+html.intro-open,
+html.intro-open body {
+  overflow: hidden;
+}
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0e100e;
+  color: var(--color-paper-light);
+  cursor: pointer;
+  will-change: opacity;
+}
+
+.intro__wall {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* A lane is one band of film crossing the screen; it carries the rotation. */
+.intro__strip {
+  position: absolute;
+  left: -18vw;
+  right: -18vw;
+  top: var(--y);
+  height: 30vh;
+  overflow: hidden;
+  background: #0a0b0a;
+  transform: rotate(var(--rot));
+  box-shadow: 0 3vh 10vh rgb(0 0 0 / 0.55);
+}
+
+/* Sprocket holes, above and below the frames. */
+.intro__strip::before,
+.intro__strip::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.2vh;
+  z-index: 2;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(236 231 219 / 0.82) 0 1.6vh,
+    transparent 1.6vh 3.6vh
+  );
+}
+
+.intro__strip::before {
+  top: 0.6vh;
+}
+
+.intro__strip::after {
+  bottom: 0.6vh;
+}
+
+.intro__track {
+  display: flex;
+  align-items: center;
+  gap: 0.5vh;
+  height: 100%;
+  padding: 3.2vh 0;
+  will-change: transform;
+}
+
+.intro__cell {
+  position: relative;
+  flex: 0 0 auto;
+  height: 100%;
+  aspect-ratio: 3 / 2;
+  background: #000;
+}
+
+.intro__frame {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  filter: saturate(1.04) contrast(1.04) brightness(0.98);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.intro__cell-no {
+  position: absolute;
+  left: 0.8vh;
+  bottom: 0.7vh;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  color: rgb(243 240 233 / 0.55);
+  text-shadow: 0 0 4px rgb(0 0 0 / 0.9);
+}
+
+.intro__veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      54% 48% at 50% 48%,
+      rgb(10 12 10 / 0.86) 0%,
+      rgb(10 12 10 / 0.62) 46%,
+      rgb(10 12 10 / 0.2) 72%,
+      rgb(8 10 8 / 0.72) 100%
+    ),
+    linear-gradient(rgb(12 14 12 / 0.22), rgb(12 14 12 / 0.4));
+}
+
+.intro__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 6vw;
+  text-shadow: 0 1px 16px rgb(0 0 0 / 0.8);
+}
+
+.intro__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.34em;
+  color: #d8c3a1;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.intro__title {
+  margin-top: clamp(1rem, 2.4vh, 1.8rem);
+  font-family: var(--ff-display);
+  font-size: clamp(3.4rem, 9.6vw, 9.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.04em;
+}
+
+.intro__line {
+  display: block;
+  opacity: 0;
+}
+
+.intro__line-text {
+  display: inline-block;
+  animation: intro-flicker 1.15s steps(1, end) 3s both;
+}
+
+.intro__line:not(.intro__line--italic) .intro__line-text {
+  font-size: 0.4em;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+
+.intro__line--italic .intro__line-text {
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: -0.055em;
+  font-size: 1.06em;
+  line-height: 0.9;
+}
+
+@keyframes intro-flicker {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.9;
+  }
+  9% {
+    opacity: 0.08;
+  }
+  13% {
+    opacity: 0.95;
+  }
+  16% {
+    opacity: 0.2;
+  }
+  22% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0.86;
+  }
+  47% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.93;
+  }
+  74% {
+    opacity: 0.6;
+  }
+  78%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.intro__rule {
+  display: block;
+  width: clamp(120px, 20vw, 220px);
+  height: 1px;
+  margin: clamp(1.4rem, 3vh, 2.2rem) 0 clamp(1rem, 2.2vh, 1.6rem);
+  background: rgb(196 175 145 / 0.55);
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+.intro__sub {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: var(--ff-cn);
+  font-size: 0.9375rem;
+  letter-spacing: 0.24em;
+  color: rgb(243 240 233 / 0.9);
+  opacity: 0;
+}
+
+.intro__sub-zh {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: rgb(243 240 233 / 0.62);
+}
+
+.intro__hint {
+  margin-top: clamp(1.8rem, 4.5vh, 3.2rem);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  color: rgb(243 240 233 / 0.42);
+  opacity: 0;
+  animation: intro-hint 2.6s ease-in-out 4.6s infinite;
+}
+
+@keyframes intro-hint {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.intro__skip {
+  position: absolute;
+  right: clamp(1.25rem, 3vw, 2.5rem);
+  top: clamp(1.25rem, 3vh, 2rem);
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.26em;
+  color: rgb(243 240 233 / 0.62);
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.9);
+}
+
+.intro__scan {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0) 0,
+    rgb(0 0 0 / 0) 2px,
+    rgb(0 0 0 / 0.18) 3px,
+    rgb(0 0 0 / 0) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+.intro__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+.intro[data-leaving="true"] {
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .intro__title {
+    font-size: clamp(2.8rem, 14vw, 4.6rem);
+  }
+
+  .intro__eyebrow {
+    font-size: 0.5625rem;
+    letter-spacing: 0.24em;
+  }
+
+  .intro__hint {
+    letter-spacing: 0.2em;
+  }
+
+  /* Smaller frame: wider lanes and shallower angles so the film still fills. */
+  .intro__strip {
+    left: -34vw;
+    right: -34vw;
+    height: 30vh;
+    transform: rotate(calc(var(--rot) * 0.5));
+  }
+
+  .intro__track {
+    padding: 3.2vh 0;
+  }
+
+  /* The middle lane sits right behind the words — hold it back a little. */
+  .intro__veil {
+    background:
+      radial-gradient(
+        90% 36% at 50% 48%,
+        rgb(10 12 10 / 0.9) 0%,
+        rgb(10 12 10 / 0.72) 55%,
+        rgb(10 12 10 / 0.2) 100%
+      ),
+      linear-gradient(rgb(12 14 12 / 0.24), rgb(12 14 12 / 0.45));
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+}
+
+@media (scripting: none) {
+  .intro {
+    display: none;
+  }
+}

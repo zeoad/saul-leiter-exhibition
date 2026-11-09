@@ -1,36 +1,54 @@
-import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "404 — Nothing Here",
-  description: "这一格画面里没有内容。回到展览首页继续观看。",
-  robots: { index: false, follow: false },
-};
-
+/**
+ * 404 — a blank frame on the contact sheet.
+ */
 export default function NotFound() {
   return (
-    <section className="not-found theme-ink">
-      <div className="container">
-        <div className="not-found__inner">
-          <span className="eyebrow">404 / OFF THE FRAME</span>
+    <section className="notfound tone-dark" aria-labelledby="notfound-title">
+      <div className="notfound__bg" aria-hidden="true">
+        <Image
+          src="/images/photographs/plate-16.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          style={{ objectPosition: "50% 40%" }}
+        />
+      </div>
+      <div className="notfound__gate" aria-hidden="true" />
 
-          <h1 className="display display--xl not-found__title" lang="en">
-            NOTHING
-            <br />
-            <em>HERE.</em>
-          </h1>
+      <div className="wrap notfound__inner">
+        <span className="eyebrow" lang="en">
+          404 / LOST FRAME
+        </span>
 
-          <p className="not-found__text">
-            这一格画面里没有内容。也许它被前景遮挡了，
-            也许它从未被拍摄。回到展厅，那里还有很多值得停留的角落。
+        <p className="notfound__num" aria-hidden="true">
+          4<em>0</em>4
+        </p>
+
+        <h1 id="notfound-title" className="page-hero__title display" lang="en">
+          THIS FRAME
+          <br />
+          <em>IS EMPTY.</em>
+        </h1>
+
+        <div className="notfound__copy">
+          <p>
+            你走到了一张没有曝光的底片。它可能被移走了，也可能从未存在。
+            回到展厅，那里还有十六张照片在等你。
           </p>
 
-          <div className="not-found__actions">
-            <Link href="/" className="btn btn--ghost-light">
-              返回展览首页
+          <div className="page-outro__actions">
+            <Link href="/work/" className="btn">
+              <ArrowLeft aria-hidden="true" strokeWidth={1.5} />
+              返回作品集
             </Link>
-            <Link href="/work/" className="btn btn--ghost-light">
-              浏览作品集
+            <Link href="/" className="btn">
+              回到封面
+              <ArrowRight aria-hidden="true" strokeWidth={1.5} />
             </Link>
           </div>
         </div>

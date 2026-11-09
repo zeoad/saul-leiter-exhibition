@@ -1,0 +1,146 @@
+/* ==========================================================================
+   A QUIET GAZE — 03 · DESIGN TOKENS
+   A projection room and a gallery wall. Two tones, one gaze.
+   --------------------------------------------------------------------------
+   Everything below is a primitive. Scenes never hard-code a colour, a
+   duration or a rhythm value; they inherit these and only override locally.
+   ========================================================================== */
+
+:root {
+  /* --- Core palette ---------------------------------------------------- */
+  --screen: #0a0b0a;          /* the dark of a screening room        */
+  --screen-2: #101210;        /* a lifted black for panels           */
+  --screen-3: #171a17;        /* hairline surfaces on black          */
+  --paper: #efe9dd;           /* gallery wall                        */
+  --paper-2: #e4ddce;         /* wall in shadow                      */
+  --paper-3: #d8d1c0;         /* deepest paper                       */
+  --ink: #1b1c19;             /* type on paper                       */
+  --ink-2: #35372f;
+  --ash: #6e6a60;             /* muted type on paper                 */
+  --cream: #ece6d9;           /* type on black                       */
+  --cream-2: #c9c2b4;
+  --ash-light: #8d887c;       /* muted type on black                 */
+
+  /* --- Leiter palette --------------------------------------------------- */
+  --red: #b3462e;             /* vermilion — the warm edge of a frame */
+  --red-deep: #7c2c1d;
+  --red-soft: #c38172;
+  --ochre: #c9a97a;
+  --teal: #2f4442;
+  --teal-soft: #52605e;
+  --sage: #7b8175;
+  --blue: #4f6772;
+  --yellow: #c9a44f;
+
+  /* --- Semantic surfaces (default = gallery) ---------------------------- */
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --fg-soft: var(--ink-2);
+  --fg-muted: var(--ash);
+  --line: rgba(27, 28, 25, 0.15);
+  --line-strong: rgba(27, 28, 25, 0.34);
+  --accent: var(--red);
+  --veil: var(--paper);
+
+  /* --- Rhythm ----------------------------------------------------------- */
+  --gutter: clamp(1.25rem, 4.2vw, 5.5rem);
+  --maxw: 108rem;
+  --col-gap: clamp(1rem, 2vw, 2.5rem);
+  --section-y: clamp(6rem, 12vw, 14rem);
+  --header-h: 76px;
+
+  /* --- Type scale ------------------------------------------------------- */
+  --fs-mega: clamp(4.25rem, 12.5vw, 15rem);
+  --fs-hero: clamp(3.1rem, 8.4vw, 9.5rem);
+  --fs-xl: clamp(2.4rem, 5.6vw, 5.6rem);
+  --fs-lg: clamp(1.75rem, 3.4vw, 3.1rem);
+  --fs-md: clamp(1.3rem, 2.1vw, 2rem);
+  --fs-lead: clamp(1.0625rem, 1.35vw, 1.3125rem);
+  --fs-body: clamp(0.9375rem, 0.98vw, 1.0625rem);
+  --fs-small: 0.8125rem;
+  --fs-micro: 0.6875rem;
+
+  /* --- Motion ----------------------------------------------------------- */
+  --t-fast: 0.28s;
+  --t-mid: 0.5s;
+  --t-slow: 0.9s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-cinema: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Live scroll velocity written by ScrollBus (-1 … 1) */
+  --sv: 0;
+
+  /* --- Legacy aliases --------------------------------------------------- */
+  /* The opening sequence, the desk companion and the viewfinder were
+     preserved verbatim; these aliases keep their stylesheets valid. */
+  --color-paper: var(--paper);
+  --color-paper-light: #f3f0e9;
+  --color-ink: var(--ink);
+  --paper-light: #f3f0e9;
+  --muted-red: var(--red);
+  --leiter-red: var(--red);
+  --darkroom: #343833;
+  --font-mono: var(--font-plex-mono, "IBM Plex Mono"), "SFMono-Regular",
+    Consolas, monospace;
+  --ff-display: var(--font-cormorant, "Cormorant Garamond"), "Cormorant",
+    "EB Garamond", Garamond, "Palatino Linotype", Georgia, serif;
+  --ff-sans: var(--font-dm-sans, "DM Sans"), "Inter", "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --ff-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC",
+    "SimSun", serif;
+}
+
+/* The two tones ----------------------------------------------------------- */
+
+.tone-dark {
+  --bg: var(--screen);
+  --fg: var(--cream);
+  --fg-soft: rgba(236, 230, 217, 0.76);
+  --fg-muted: var(--ash-light);
+  --line: rgba(236, 230, 217, 0.14);
+  --line-strong: rgba(236, 230, 217, 0.32);
+  --accent: var(--red-soft);
+  --veil: var(--screen);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.tone-paper {
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --fg-soft: var(--ink-2);
+  --fg-muted: var(--ash);
+  --line: rgba(27, 28, 25, 0.15);
+  --line-strong: rgba(27, 28, 25, 0.34);
+  --accent: var(--red);
+  --veil: var(--paper);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.tone-paper-deep {
+  --bg: var(--paper-2);
+  --fg: var(--ink);
+  --fg-soft: var(--ink-2);
+  --fg-muted: var(--ash);
+  --line: rgba(27, 28, 25, 0.17);
+  --line-strong: rgba(27, 28, 25, 0.36);
+  --accent: var(--red);
+  --veil: var(--paper-2);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.tone-teal {
+  --bg: var(--teal);
+  --fg: var(--cream);
+  --fg-soft: rgba(236, 230, 217, 0.78);
+  --fg-muted: rgba(236, 230, 217, 0.5);
+  --line: rgba(236, 230, 217, 0.16);
+  --line-strong: rgba(236, 230, 217, 0.34);
+  --accent: var(--ochre);
+  --veil: var(--teal);
+  background: var(--bg);
+  color: var(--fg);
+}
