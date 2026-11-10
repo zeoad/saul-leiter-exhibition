@@ -2961,3 +2961,47 @@
     margin-top: 0;
   }
 }
+
+/* ==========================================================================
+   SECTION MASTHEADS — editorial rhythm
+   --------------------------------------------------------------------------
+   These declarations used to live in the preserved override sheet, which was
+   imported last and therefore won every conflict. They are folded here, at the
+   end of the scene layer, so the cascade order is unchanged.
+   ========================================================================== */
+
+.ny__head,
+.glass__head,
+.works__head,
+.statement__grid {
+  position: relative;
+}
+
+.ny__head,
+.glass__head,
+.works__head {
+  border-top: 1px solid var(--line);
+  padding-top: clamp(1rem, 2vw, 1.75rem);
+}
+
+.statement__title em {
+  font-size: 0.64em;
+  letter-spacing: 0.03em;
+  font-style: italic;
+}
+
+.ny__head h2 em {
+  font-size: 1.06em;
+  font-style: italic;
+  color: var(--accent);
+}
+
+.glass__head h2 em {
+  font-size: 1.1em;
+  letter-spacing: -0.05em;
+}
+
+.works__head h2 em {
+  font-size: 0.92em;
+  font-style: italic;
+}

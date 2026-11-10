@@ -12,6 +12,8 @@
     "typecheck": "tsc --noEmit",
     "preview": "node scripts/serve-out.mjs",
     "screenshots": "node scripts/screenshot.mjs",
+    "visual": "node scripts/visual-regression.mjs",
+    "visual:update": "node scripts/visual-regression.mjs --update",
     "deploy": "node scripts/deploy.mjs --build",
     "deploy:only": "node scripts/deploy.mjs",
     "assets:images": "python scripts/import-real-assets.py"
@@ -33,6 +35,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "typescript": "^5"

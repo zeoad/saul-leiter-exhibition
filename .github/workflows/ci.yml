@@ -47,7 +47,14 @@ jobs:
           echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
           "$CHROME_PATH" --version
 
-      - name: Screenshot key pages
+      # Real gate: deterministic viewport shots compared against the committed
+      # baselines in .visual/baseline. Fails when more than 0.3% of a page moved.
+      - name: Visual regression gate
+        run: npm run visual
+
+      # Context for a failed gate: full-page captures of every route.
+      - name: Capture full-page screenshots on failure
+        if: failure()
         run: |
           node scripts/serve-out.mjs &
           SERVER_PID=$!
@@ -63,12 +70,15 @@ jobs:
           node scripts/screenshot.mjs --path /archive/ --name archive --full
           kill $SERVER_PID || true
 
-      - name: Upload screenshots
+      - name: Upload visual artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: page-screenshots
-          path: .screenshots/
+          name: visual-regression
+          path: |
+            .visual/current/
+            .visual/diff/
+            .screenshots/
           retention-days: 14
 
   # Opt-in: set repository variable DEPLOY_TO_PAGES=true to publish out/.

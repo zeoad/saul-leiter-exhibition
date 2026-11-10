@@ -71,9 +71,10 @@
   /* Live scroll velocity written by ScrollBus (-1 … 1) */
   --sv: 0;
 
-  /* --- Legacy aliases --------------------------------------------------- */
-  /* The opening sequence, the desk companion and the viewfinder were
-     preserved verbatim; these aliases keep their stylesheets valid. */
+  /* --- Compatibility aliases -------------------------------------------- */
+  /* Short aliases kept for the overlay sheets (camera.css, viewfinder.css,
+     intro.css) and a few older scene rules. New code should use the semantic
+     names above; these exist so overlays never hard-code a hex value. */
   --color-paper: var(--paper);
   --color-paper-light: #f3f0e9;
   --color-ink: var(--ink);

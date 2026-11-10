@@ -3,9 +3,17 @@
 /* ==========================================================================
    A QUIET GAZE — V2 · THE ART OF SEEING
    --------------------------------------------------------------------------
-   Order matters: tokens → base → chrome → scenes → pages → preserved legacy.
-   The opening sequence, the desk companion and the viewfinder keep their
-   original stylesheets untouched; everything else is rebuilt.
+   One cascade, ordered by scope:
+
+     tokens → base → chrome → scenes → pages
+       → camera (desk companion + darkroom)
+       → viewfinder (capture game HUD)
+       → intro (opening sequence)
+
+   The three interactive sheets keep their own files because they own
+   full-screen overlays, but they read the same tokens as everything else.
+   There is no second design language left: the former "legacy" sheets were
+   folded into base.css / scenes.css and split into camera.css + viewfinder.css.
    ========================================================================== */
 
 @import "../styles/tokens.css";
@@ -13,5 +21,6 @@
 @import "../styles/chrome.css";
 @import "../styles/scenes.css";
 @import "../styles/pages.css";
-@import "../styles/legacy-pet.css";
-@import "../styles/legacy-intro.css";
+@import "../styles/camera.css";
+@import "../styles/viewfinder.css";
+@import "../styles/intro.css";

@@ -5,8 +5,7 @@ import "./globals.css";
 import ArtworkLightbox from "@/components/gallery/ArtworkLightbox";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import LittleCamera from "@/components/interaction/LittleCamera";
-import Viewfinder from "@/components/interaction/Viewfinder";
+import InteractiveLayer from "@/components/interaction/InteractiveLayer";
 import Cursor from "@/components/interaction/Cursor";
 import PageVeil from "@/components/animation/PageVeil";
 import ScrollBus from "@/components/animation/ScrollBus";
@@ -137,8 +136,8 @@ export default function RootLayout({
           <ArtworkLightbox />
           <Cursor />
           <PageVeil />
-          <LittleCamera />
-          <Viewfinder />
+          {/* Desk camera + viewfinder game: code-split and mounted on idle. */}
+          <InteractiveLayer />
         </SmoothScroll>
       </body>
     </html>

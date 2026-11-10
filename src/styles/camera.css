@@ -1,0 +1,397 @@
+/* ==========================================================================
+   DESK CAMERA — Little Camera companion + hidden darkroom
+   --------------------------------------------------------------------------
+   Extracted from the preserved sheet. Duplicate declarations were collapsed
+   into their effective (last-wins) value; nothing here is a second design
+   language — it reads the same tokens as every other layer.
+   ========================================================================== */
+
+.little-camera {
+  position: fixed;
+  right: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  width: 92px;
+  user-select: none;
+}
+
+.little-camera__body {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.little-camera__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.26));
+  transform-origin: 50% 90%;
+  animation: lc-breathe 5.5s ease-in-out infinite;
+}
+
+@keyframes lc-breathe {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) rotate(1deg) scale(1.015);
+  }
+}
+
+/* lens blink — a slow vertical squash of the pupil */
+.little-camera__pupil {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: lc-blink 6.4s ease-in-out infinite;
+}
+
+@keyframes lc-blink {
+  0%,
+  46%,
+  54%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.12);
+  }
+}
+
+/* shutter press + flash */
+.little-camera__shutter {
+  transition: transform 0.15s var(--ease-out);
+}
+
+.little-camera[data-state="click"] .little-camera__shutter {
+  transform: translateY(2px);
+}
+
+.little-camera__flash {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.little-camera[data-state="click"] .little-camera__flash {
+  animation: lc-flash 0.3s var(--ease-out);
+}
+
+@keyframes lc-flash {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* eyelid: blinks fast, sleeps slowly */
+.little-camera__lid {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.09s linear;
+}
+
+.little-camera[data-blink="true"] .little-camera__lid {
+  opacity: 1;
+}
+
+.little-camera[data-state="sleep"] .little-camera__lid {
+  opacity: 1;
+  transition-duration: 0.6s;
+}
+
+.little-camera[data-state="sleep"] .little-camera__svg {
+  animation-play-state: paused;
+  filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.22)) saturate(0.6);
+}
+
+.little-camera[data-state="follow"] .little-camera__svg {
+  animation-duration: 3.6s;
+}
+
+/* secret — a soft red pulse behind the body */
+.little-camera[data-state="secret"]::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(165, 72, 56, 0.28), transparent 70%);
+  animation: lc-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes lc-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* collection counter */
+.little-camera__counter {
+  position: absolute;
+  left: -6px;
+  top: -4px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 18px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.08em;
+  color: var(--paper-light);
+  background: var(--leiter-red, #a54838);
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.2);
+}
+
+.little-camera[data-state="sleep"] .little-camera__counter {
+  opacity: 0.4;
+}
+
+/* speech bubble */
+.little-camera__bubble {
+  position: absolute;
+  right: calc(100% + 12px);
+  bottom: 8px;
+  width: max-content;
+  max-width: 220px;
+  padding: 0.6rem 0.8rem;
+  background: var(--paper-light);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+  animation: lc-bubble-in 0.35s var(--ease-out);
+}
+
+@keyframes lc-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.little-camera__bubble::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  bottom: 14px;
+  width: 8px;
+  height: 8px;
+  background: var(--paper-light);
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  transform: rotate(45deg);
+}
+
+.little-camera__bubble-text {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.little-camera__bubble-action {
+  display: inline-block;
+  margin-top: 0.45rem;
+  padding: 0.3rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.16em;
+  color: var(--leiter-red, var(--muted-red));
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+}
+
+/* dismiss affordance */
+.little-camera__dismiss {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper-light);
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity 0.3s var(--ease-out),
+    transform 0.3s var(--ease-out);
+}
+
+.little-camera:hover .little-camera__dismiss,
+.little-camera__dismiss:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.little-camera__dismiss svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* ---- the hidden darkroom ------------------------------------------------ */
+
+.darkroom {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--darkroom, #343833);
+  animation: darkroom-in 0.6s var(--ease-out);
+}
+
+@keyframes darkroom-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.darkroom__inner {
+  width: min(880px, 100% - 8vw);
+  max-height: 100svh;
+  overflow-y: auto;
+  padding: 2rem 0;
+  color: var(--paper-light);
+}
+
+.darkroom__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(243, 240, 233, 0.2);
+}
+
+.darkroom__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.3em;
+  color: rgba(243, 240, 233, 0.6);
+}
+
+.darkroom__close {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(243, 240, 233, 0.35);
+  color: var(--paper-light);
+  background: none;
+  cursor: pointer;
+  transition:
+    background 0.3s var(--ease-out),
+    color 0.3s var(--ease-out);
+}
+
+.darkroom__close:hover {
+  background: var(--paper-light);
+  color: var(--ink);
+}
+
+.darkroom__figure {
+  margin: 2rem 0 0;
+}
+
+.darkroom__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid rgba(243, 240, 233, 0.25);
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.darkroom__img {
+  object-fit: contain;
+}
+
+.darkroom__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  color: rgba(243, 240, 233, 0.65);
+}
+
+.darkroom__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.8;
+  color: rgba(243, 240, 233, 0.7);
+}
+
+.darkroom__link {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  color: var(--paper-light);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+@media (max-width: 767px) {
+  .little-camera {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 62px;
+  }
+
+  .little-camera__bubble {
+    right: calc(100% + 8px);
+    max-width: 170px;
+  }
+
+  .little-camera__counter {
+    min-width: 20px;
+    height: 15px;
+    font-size: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .little-camera__svg,
+  .little-camera__pupil {
+    animation: none;
+  }
+}
