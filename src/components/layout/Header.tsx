@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react";
 import Directory from "@/components/layout/Directory";
 import { navLinks } from "@/data/exhibition";
 import { startScroll, stopScroll } from "@/lib/lenis";
-import { openViewfinder } from "@/lib/viewfinder";
+import { HINT_KEY, openViewfinder } from "@/lib/viewfinder";
 
 /**
  * THE MASTHEAD — a thin register that blends with whatever is behind it.
@@ -20,6 +20,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [vfHint, setVfHint] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -28,7 +29,30 @@ export default function Header() {
     window.setTimeout(() => menuButtonRef.current?.focus(), 80);
   }, []);
 
-  const isHome = pathname === "/";
+  /** Open the viewfinder from anywhere, and retire the first-visit note. */
+  const startViewfinder = useCallback(() => {
+    setVfHint(false);
+    try {
+      window.localStorage.setItem(HINT_KEY, "1");
+    } catch {
+      /* storage unavailable — the note simply returns next session */
+    }
+    openViewfinder();
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!window.localStorage.getItem(HINT_KEY)) setVfHint(true);
+    } catch {
+      /* storage unavailable — no invitation */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!vfHint) return;
+    const timer = window.setTimeout(() => setVfHint(false), 12_000);
+    return () => window.clearTimeout(timer);
+  }, [vfHint]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -130,18 +154,22 @@ export default function Header() {
           </nav>
 
           <div className="masthead__actions">
-            {isHome ? (
-              <button
-                type="button"
-                className="masthead__action masthead__action--vf"
-                onClick={openViewfinder}
-                data-cursor="link"
-                data-cursor-label="FIND"
-                aria-label="打开取景器游戏"
-              >
-                <span lang="en">VF</span>
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="masthead__action masthead__action--vf"
+              onClick={startViewfinder}
+              data-cursor="link"
+              data-cursor-label="FIND"
+              aria-label="打开取景器：在展览中收集 16 张照片"
+            >
+              <span className="masthead__vf-mark" aria-hidden="true">
+                ◉
+              </span>
+              <span className="masthead__vf-word" lang="en">
+                VIEWFINDER
+              </span>
+              <span className="masthead__vf-cn">取景器</span>
+            </button>
 
             <button
               type="button"
@@ -173,6 +201,24 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {vfHint ? (
+        <button
+          type="button"
+          className="vf-invite"
+          onClick={startViewfinder}
+          data-cursor="link"
+          data-cursor-label="FIND"
+        >
+          <span className="vf-invite__dot" aria-hidden="true" />
+          <span>
+            收集 <b>16</b> 张照片
+          </span>
+          <span className="vf-invite__cta" lang="en">
+            OPEN VIEWFINDER →
+          </span>
+        </button>
+      ) : null}
 
       <Directory open={directoryOpen} onClose={() => setDirectoryOpen(false)} />
 

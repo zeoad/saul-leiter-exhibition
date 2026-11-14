@@ -6,23 +6,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 
-import { homeChapters } from "@/data/exhibition";
-import { photographs } from "@/data/photographs";
+import { getPhotographBySlug } from "@/lib/gallery";
 import { scrollToTarget, startScroll, stopScroll } from "@/lib/lenis";
 
-const CN: Record<string, string> = {
-  cover: "封面",
-  statement: "开幕陈述",
-  "new-york": "纽约",
-  color: "色彩",
-  "behind-the-glass": "遮挡",
-  "rain-and-snow": "雨雪",
-  "the-ordinary": "日常",
-  "painters-eye": "画家之眼",
-  "selected-works": "精选作品",
-  life: "生平",
-  closing: "回望",
-};
+/** The exhibition is four rooms plus the cover they hang behind. */
+const ROWS = [
+  { index: "00", href: "/", title: "The Cover", cn: "封面", slug: "taxi" },
+  { index: "01", href: "/work/", title: "The Work", cn: "印相校样", slug: "red-curtain" },
+  { index: "02", href: "/vision/", title: "The Vision", cn: "四种观看", slug: "mirrors" },
+  { index: "03", href: "/life/", title: "The Life", cn: "灯下的房间", slug: "man-in-straw-hat" },
+  { index: "04", href: "/archive/", title: "The Archive", cn: "作品登记", slug: "sidewalk" },
+];
 
 /**
  * THE EXHIBITION DIRECTORY — every room of the show, in one list.
@@ -60,6 +54,11 @@ export default function Directory({
       setActive(null);
     };
   }, [open, onClose]);
+
+  const activeRow = ROWS.find((row) => row.href === active);
+  const activePhoto = activeRow
+    ? getPhotographBySlug(activeRow.slug)
+    : undefined;
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const preview = previewRef.current;
@@ -100,53 +99,37 @@ export default function Directory({
           </button>
         </div>
 
-        <nav className="directory__list" aria-label="展览章节">
-          {homeChapters.map((chapter, index) => (
+        <nav className="directory__list" aria-label="展厅目录">
+          {ROWS.map((row, index) => (
             <Link
-              key={chapter.id}
+              key={row.href}
               ref={index === 0 ? firstRowRef : undefined}
-              href={`/#${chapter.id}`}
+              href={row.href}
               className="directory__row"
-              onPointerEnter={() => setActive(chapter.id)}
+              onPointerEnter={() => setActive(row.href)}
               onPointerLeave={() => setActive(null)}
-              onFocus={() => setActive(chapter.id)}
+              onFocus={() => setActive(row.href)}
               onBlur={() => setActive(null)}
               onClick={(event) => {
-                if (pathname === "/") {
+                if (pathname === "/" && row.href === "/") {
                   event.preventDefault();
                   onClose();
                   window.setTimeout(() => {
-                    scrollToTarget(`#${chapter.id}`, -72);
-                    window.history.replaceState(null, "", `#${chapter.id}`);
+                    scrollToTarget(0);
+                    window.history.replaceState(null, "", "/");
                   }, 260);
                   return;
                 }
                 onClose();
               }}
             >
-              <i>{chapter.number}</i>
+              <i>{row.index}</i>
               <span className="directory__row-title" lang="en">
-                {chapter.title}
+                {row.title}
               </span>
-              <span className="directory__row-cn">{CN[chapter.id]}</span>
+              <span className="directory__row-cn">{row.cn}</span>
             </Link>
           ))}
-
-          <Link
-            href="/archive/"
-            className="directory__row"
-            onPointerEnter={() => setActive("archive")}
-            onPointerLeave={() => setActive(null)}
-            onFocus={() => setActive("archive")}
-            onBlur={() => setActive(null)}
-            onClick={onClose}
-          >
-            <i>12</i>
-            <span className="directory__row-title" lang="en">
-              The Archive
-            </span>
-            <span className="directory__row-cn">作品档案</span>
-          </Link>
         </nav>
 
         <div className="directory__foot">
@@ -161,18 +144,9 @@ export default function Directory({
         data-show={Boolean(active)}
         aria-hidden="true"
       >
-        {active ? (
+        {activePhoto ? (
           <Image
-            src={
-              active === "archive"
-                ? photographs[15].image.src
-                : photographs[
-                    Math.min(
-                      photographs.length - 1,
-                      homeChapters.findIndex((c) => c.id === active) * 2
-                    )
-                  ]?.image.src
-            }
+            src={activePhoto.image.src}
             alt=""
             fill
             sizes="(max-width: 1023px) 0px, 320px"

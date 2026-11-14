@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { photographs } from "@/data/photographs";
-import { startScroll, stopScroll } from "@/lib/lenis";
 import {
+  GUIDE_KEY,
   OPEN_EVENT,
   PROGRESS_EVENT,
   plateNumber,
@@ -39,6 +39,8 @@ export function useViewfinderGame() {
   const [live, setLive] = useState("");
   const [intro, setIntro] = useState(true);
   const [listOpen, setListOpen] = useState(false);
+  const [guide, setGuide] = useState(false);
+  const [targetCount, setTargetCount] = useState(0);
 
   const overlayRef = useRef<HTMLDivElement>(null);
   const reticleRef = useRef<HTMLDivElement>(null);
@@ -106,6 +108,7 @@ export function useViewfinderGame() {
   /* ---- collect the plate anchors currently on screen -------------------- */
   const collectTargets = useCallback(() => {
     targetsRef.current = collectPlateTargets();
+    setTargetCount(targetsRef.current.length);
     if (overlayRef.current) {
       overlayRef.current.dataset.targets = String(targetsRef.current.length);
     }
@@ -122,7 +125,7 @@ export function useViewfinderGame() {
       const elementAtPoint = document.elementFromPoint(clientX, clientY);
       if (
         elementAtPoint?.closest(
-          ".vf__bar, .vf__controls, .vf__strip, .vf__close, .vf__list"
+          ".vf__bar, .vf__controls, .vf__strip, .vf__close, .vf__list, .vf__guide, .vf__complete, .vf__empty, .vf__egg"
         )
       ) {
         return;
@@ -177,8 +180,17 @@ export function useViewfinderGame() {
     if (!open) return;
 
     document.documentElement.classList.add("vf-open");
-    stopScroll();
     setIntro(true);
+
+    let guideSeen = false;
+    try {
+      guideSeen = window.localStorage.getItem(GUIDE_KEY) === "1";
+    } catch {
+      /* storage unavailable — show the guide every time */
+    }
+    setGuide(!guideSeen);
+    if (!guideSeen) setIntro(false);
+
     announce("取景器已打开。移动取景框对准照片，按空格或回车拍摄，按 Esc 退出。");
 
     const frame = window.requestAnimationFrame(() => {
@@ -226,7 +238,6 @@ export function useViewfinderGame() {
       window.removeEventListener("pointercancel", endDrag);
       window.removeEventListener("resize", onResize);
       document.documentElement.classList.remove("vf-open");
-      startScroll();
     };
   }, [open, collectTargets, place, announce]);
 
@@ -268,7 +279,15 @@ export function useViewfinderGame() {
   /* ---- capture ---------------------------------------------------------- */
   const capture = useCallback(
     (explicitPlate?: number) => {
+      if (guide) return;
       flashNow();
+
+      if (foundRef.current.length >= photographs.length) {
+        toastNow("CONTACT SHEET COMPLETE — 16 / 16");
+        announce("全部 16 张照片都已收集。");
+        return;
+      }
+
       const plate =
         typeof explicitPlate === "number" ? explicitPlate : lockedRef.current;
 
@@ -298,7 +317,7 @@ export function useViewfinderGame() {
         `已收集 ${photo?.plate ?? ""} ${photo?.title ?? ""}。共 ${next.length} / ${photographs.length} 张。`
       );
     },
-    [announce, flashNow, toastNow]
+    [announce, flashNow, toastNow, guide]
   );
 
   /* ---- exit + shooting keys --------------------------------------------- */
@@ -357,11 +376,26 @@ export function useViewfinderGame() {
   const close = useCallback(() => setOpen(false), []);
   const toggleList = useCallback(() => setListOpen((value) => !value), []);
 
+  const dismissGuide = useCallback(
+    (persist: boolean) => {
+      setGuide(false);
+      if (persist) {
+        try {
+          window.localStorage.setItem(GUIDE_KEY, "1");
+        } catch {
+          /* storage unavailable — the guide will show again next time */
+        }
+      }
+      announce("开始拍摄。移动取景框对准照片，画面锁定后按下快门。");
+    },
+    [announce]
+  );
+
   const handleOverlayClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (
         (event.target as HTMLElement).closest(
-          ".vf__close, .vf__bar, .vf__strip, .vf__shutter, .vf__list"
+          ".vf__close, .vf__bar, .vf__strip, .vf__shutter, .vf__list, .vf__guide, .vf__complete, .vf__empty, .vf__egg"
         )
       ) {
         return;
@@ -383,6 +417,8 @@ export function useViewfinderGame() {
     live,
     intro,
     listOpen,
+    guide,
+    targetCount,
     overlayRef,
     reticleRef,
     apertureRef,
@@ -390,6 +426,7 @@ export function useViewfinderGame() {
     close,
     capture,
     toggleList,
+    dismissGuide,
     handleOverlayClick,
   };
 }

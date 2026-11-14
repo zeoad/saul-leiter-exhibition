@@ -2,23 +2,16 @@ import type { Metadata } from "next";
 
 import IntroSequence from "@/components/animation/IntroSequence";
 import ChapterRail from "@/components/layout/ChapterRail";
-import BehindGlass from "@/components/home/BehindGlass";
 import Closing from "@/components/home/Closing";
-import ColorLanguage from "@/components/home/ColorLanguage";
 import Cover from "@/components/home/Cover";
-import LifePreview from "@/components/home/LifePreview";
-import NewYork from "@/components/home/NewYork";
-import OpeningStatement from "@/components/home/OpeningStatement";
-import PaintersEye from "@/components/home/PaintersEye";
-import RainSnow from "@/components/home/RainSnow";
-import SelectedWorks from "@/components/home/SelectedWorks";
-import TheOrdinary from "@/components/home/TheOrdinary";
+import Programme from "@/components/home/Programme";
+import "@/styles/home.css";
 import { createPageMetadata, SITE_URL } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Saul Leiter — A Quiet Gaze | 静默的凝视",
   description:
-    "进入索尔·雷特的观看方式：从纽约街头、色彩与遮挡，到雨雪和日常。十一个章节的独立线上摄影展览。",
+    "进入索尔·雷特的观看方式：封面之后是四道门——作品、视觉语言、生平与数字档案。先选一间，再往下走。",
   path: "/",
 });
 
@@ -57,15 +50,7 @@ export default function HomePage() {
       />
 
       <Cover />
-      <OpeningStatement />
-      <NewYork />
-      <ColorLanguage />
-      <BehindGlass />
-      <RainSnow />
-      <TheOrdinary />
-      <PaintersEye />
-      <SelectedWorks />
-      <LifePreview />
+      <Programme />
       <Closing />
     </>
   );

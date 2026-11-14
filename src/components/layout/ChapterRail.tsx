@@ -1,91 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
 
-import { homeChapters } from "@/data/exhibition";
+import { navLinks } from "@/data/exhibition";
 import { scrollToTarget } from "@/lib/lenis";
 
 /**
- * THE REGISTER — a thin vertical index on the right edge of the exhibition.
- * It knows which room you are standing in, and will take you to another.
+ * THE ROOM RAIL — the four rooms, always reachable.
+ *
+ * The home page is only a programme now, so this rail no longer tracks
+ * chapters; it simply keeps the exhibition one click away while you read.
  */
 export default function ChapterRail() {
-  const [active, setActive] = useState("cover");
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    const sections = homeChapters
-      .map((chapter) => document.getElementById(chapter.id))
-      .filter((section): section is HTMLElement => Boolean(section));
-    const footer = document.querySelector<HTMLElement>(".site-footer");
-
-    if (!sections.length) return;
-
-    let frame = 0;
-
-    const update = () => {
-      const marker = window.scrollY + window.innerHeight * 0.42;
-      let current = sections[0];
-
-      for (const section of sections) {
-        if (section.offsetTop <= marker) current = section;
-      }
-
-      setActive((previous) => (previous === current.id ? previous : current.id));
-
-      if (footer) {
-        setHidden(window.scrollY + window.innerHeight > footer.offsetTop + 80);
-      }
-    };
-
-    const onScroll = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        update();
-      });
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
   return (
-    <nav
-      className="chapter-marks"
-      data-hidden={hidden}
-      aria-label="展览章节导航"
-    >
-      <ul className="chapter-marks__list">
-        {homeChapters.map((chapter) => (
-          <li key={chapter.id}>
-            <a
-              className="chapter-marks__item"
-              data-active={active === chapter.id}
-              href={`#${chapter.id}`}
-              aria-label={`${chapter.number} — ${chapter.title}`}
-              aria-current={active === chapter.id ? "true" : undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                scrollToTarget(`#${chapter.id}`, -72);
-                window.history.replaceState(null, "", `#${chapter.id}`);
-              }}
+    <nav className="room-rail" aria-label="展厅选择">
+      <ul className="room-rail__list">
+        {navLinks.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              className="room-rail__item"
+              aria-label={`${link.index} — ${link.label}`}
+              data-cursor="link"
+              data-cursor-label="ENTER"
             >
-              <span className="chapter-marks__label" aria-hidden="true">
-                {chapter.number} / {chapter.label}
+              <span className="room-rail__label" aria-hidden="true">
+                {link.index} / {link.label}
               </span>
-              <span className="chapter-marks__tick" aria-hidden="true" />
-            </a>
+              <span className="room-rail__tick" aria-hidden="true" />
+            </Link>
           </li>
         ))}
       </ul>
+
+      <button
+        type="button"
+        className="room-rail__top"
+        onClick={() => scrollToTarget(0)}
+        data-cursor="link"
+        data-cursor-label="TOP"
+        aria-label="回到封面"
+      >
+        <span className="room-rail__label" aria-hidden="true">
+          COVER
+        </span>
+        <span className="room-rail__tick" aria-hidden="true" />
+      </button>
     </nav>
   );
 }

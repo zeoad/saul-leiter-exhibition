@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 
-import { getLightboxCaption, getPhotographBySlug } from "@/lib/gallery";
+import { getPhotographBySlug } from "@/lib/gallery";
 import { scrollToTarget } from "@/lib/lenis";
 
 const TICKER = [
@@ -19,9 +19,10 @@ const TICKER = [
 ];
 
 /**
- * 01 · THE COVER — the film gate opens.
- * The photograph starts as a single frame and expands to fill the wall,
- * the title rises line by line, and the plate keeps a slow breathing motion.
+ * 01 · THE COVER — the film gate opens, and points at the programme.
+ *
+ * The cover holds exactly one photograph and one way forward. Nothing here
+ * previews the other rooms; that is the programme's job, one screen below.
  */
 export default function Cover() {
   const rootRef = useRef<HTMLElement>(null);
@@ -152,8 +153,6 @@ export default function Cover() {
     };
   }, []);
 
-  const caption = taxi ? getLightboxCaption(taxi) : "";
-
   return (
     <section
       ref={rootRef}
@@ -176,25 +175,13 @@ export default function Cover() {
             />
           ) : null}
           <span className="cover__scrim" aria-hidden="true" />
-        </div>
 
-        <a
-          className="cover__plate-link"
-          href={taxi?.image.src ?? "#"}
-          data-pswp-lightbox
-          data-pswp-width={taxi?.image.width ?? 1200}
-          data-pswp-height={taxi?.image.height ?? 800}
-          data-pswp-caption={caption}
-          data-cursor="view"
-          data-cursor-label="VIEW PLATE"
-          aria-label="查看作品 Taxi, 1957"
-        >
-          <span className="cover__plate-tag">
+          <span className="cover__plate-tag" aria-hidden="true">
             <b>Taxi</b>
             <span>1957 · PL. 006</span>
             <span>© ESTATE OF SAUL LEITER</span>
           </span>
-        </a>
+        </div>
       </div>
 
       <div className="cover__gate-marks" aria-hidden="true" />
@@ -224,7 +211,7 @@ export default function Cover() {
         </p>
 
         <p className="cover__en" lang="en">
-          Eleven rooms about colour, obstruction, weather and the ordinary.
+          Four rooms about colour, obstruction, weather and the ordinary.
           <br />
           Photographs by Saul Leiter, 1923—2013, New York.
         </p>
@@ -238,19 +225,19 @@ export default function Cover() {
         </div>
 
         <div className="cover__hud-mid">
-          <b>11</b>
-          <span lang="en">CHAPTERS</span>
+          <b>04</b>
+          <span lang="en">ROOMS</span>
         </div>
 
         <button
           type="button"
           className="cover__scroll"
-          onClick={() => scrollToTarget("#statement", -40)}
+          onClick={() => scrollToTarget("#programme", -40)}
           data-cursor="link"
           data-cursor-label="ENTER"
-          aria-label="进入展览"
+          aria-label="进入节目单，选择展厅"
         >
-          <span lang="en">SCROLL TO ENTER</span>
+          <span lang="en">ENTER THE PROGRAMME</span>
           <i aria-hidden="true" />
         </button>
       </div>

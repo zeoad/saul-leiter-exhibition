@@ -35,11 +35,14 @@ export default function Viewfinder() {
       lockedPhoto={game.lockedPhoto}
       collected={game.collected}
       listOpen={game.listOpen}
+      guide={game.guide}
+      targetCount={game.targetCount}
       onToggleList={game.toggleList}
       onClose={game.close}
       onShoot={() => game.capture()}
       onCapturePlate={(plate) => game.capture(plate)}
       onOverlayClick={game.handleOverlayClick}
+      onDismissGuide={game.dismissGuide}
     />,
     document.body
   );

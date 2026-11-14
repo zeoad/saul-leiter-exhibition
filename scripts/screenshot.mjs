@@ -5,7 +5,7 @@
  * Usage:
  *   node scripts/screenshot.mjs --path / --name home --full
  *   node scripts/screenshot.mjs --path / --name home --width 390 --height 844 --full
- *   node scripts/screenshot.mjs --path / --name home --sections "#cover,#color,#closing"
+ *   node scripts/screenshot.mjs --path / --name home --sections "#cover,#programme,#closing"
  *
  * Requires the static preview server: `node scripts/serve-out.mjs`.
  */

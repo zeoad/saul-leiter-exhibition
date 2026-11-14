@@ -1,61 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Rewind } from "lucide-react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import { homeCopy, site } from "@/data/exhibition";
+import { homeCopy, navLinks, site } from "@/data/exhibition";
 import { getLenis, scrollToTarget } from "@/lib/lenis";
-import { getPhotographBySlug } from "@/lib/gallery";
 
 /**
- * 11 · CLOSING — the film gate closes again.
- * The two bars travel into the frame as the section enters, the essay
- * arrives underneath, and the projector can be rewound to the very start.
+ * 03 · CLOSING — a short register, not an essay.
+ *
+ * The last screen is deliberately less than half a viewport: the four rooms
+ * restated as small type, the exhibition's own credits, and two ways back.
  */
 export default function Closing() {
-  const rootRef = useRef<HTMLElement>(null);
-  const topRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  const copy = homeCopy.closing;
-  const sidewalk = getPhotographBySlug("sidewalk");
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      const trigger = {
-        trigger: root,
-        start: "top 85%",
-        end: "top 25%",
-        scrub: 0.6,
-      };
-
-      gsap.fromTo(
-        topRef.current,
-        { yPercent: -100 },
-        { yPercent: 0, ease: "none", scrollTrigger: trigger }
-      );
-
-      gsap.fromTo(
-        bottomRef.current,
-        { yPercent: 100 },
-        { yPercent: 0, ease: "none", scrollTrigger: { ...trigger } }
-      );
-    }, root);
-
-    return () => ctx.revert();
-  }, []);
+  const { closing } = homeCopy;
 
   const replay = () => {
     const lenis = getLenis();
@@ -72,83 +29,57 @@ export default function Closing() {
 
   return (
     <section
-      ref={rootRef}
       id="closing"
       className="scene scene-closing tone-dark"
       aria-labelledby="closing-title"
     >
-      <div className="closing__bg" aria-hidden="true">
-        <Image
-          src={
-            sidewalk?.image.src ?? "/images/hero/closing-quiet.webp"
-          }
-          alt=""
-          fill
-          sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "50% 42%" }}
-        />
-      </div>
-      <span className="closing__bg-scrim" aria-hidden="true" />
-
-      <div ref={topRef} className="closing__film closing__film--top" aria-hidden="true" />
-      <div
-        ref={bottomRef}
-        className="closing__film closing__film--bottom"
-        aria-hidden="true"
-      />
+      <span className="closing__perf" aria-hidden="true" />
 
       <div className="wrap closing__inner">
-        <span className="eyebrow" lang="en">
-          11 / CLOSING ESSAY
-        </span>
+        <div className="closing__lead">
+          <span className="eyebrow" lang="en">
+            03 / CLOSING
+          </span>
 
-        <h2 id="closing-title" className="closing__title display">
-          LOOK
-          <em>AGAIN.</em>
-        </h2>
+          <h2 id="closing-title" className="closing__title display">
+            LOOK <em>AGAIN.</em>
+          </h2>
 
-        <p className="closing__cn">离开之前，请再看一次。</p>
+          <p className="closing__line">{closing.closingLine}</p>
+        </div>
 
-        <div className="closing__essay" data-reveal-group>
-          {copy.paragraphs.map((paragraph) => (
-            <p key={paragraph.slice(0, 12)}>{paragraph}</p>
+        <nav className="closing__rooms" aria-label="四个展厅">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="closing__room">
+              <i>{link.index}</i>
+              <span>{link.label}</span>
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        <p className="closing__line">{copy.closingLine}</p>
+        <div className="closing__foot">
+          <span>
+            {site.name} — {site.subtitle} · {site.season}
+          </span>
 
-        <div className="closing__actions">
-          <Link href="/work/" className="btn">
-            浏览全部作品
-            <ArrowUpRight aria-hidden="true" strokeWidth={1.5} />
-          </Link>
-          <Link href="/archive/" className="btn">
-            打开数字档案
-            <ArrowUpRight aria-hidden="true" strokeWidth={1.5} />
-          </Link>
-          <button
-            type="button"
-            className="closing__replay"
-            onClick={replay}
-            data-cursor="link"
-            data-cursor-label="REWIND"
-          >
-            <Rewind aria-hidden="true" strokeWidth={1.5} size={14} />
-            REPLAY THE OPENING
-          </button>
-        </div>
-
-        <div className="closing__signature">
-          <span>{site.name} — {site.subtitle}</span>
-          <span>{site.curator}</span>
-          <span>{site.season}</span>
-          <button
-            type="button"
-            className="closing__back"
-            onClick={() => scrollToTarget(0)}
-          >
-            BACK TO THE COVER ↑
-          </button>
+          <div className="closing__actions">
+            <button
+              type="button"
+              onClick={() => scrollToTarget("#programme", -40)}
+              data-cursor="link"
+              data-cursor-label="PROGRAMME"
+            >
+              BACK TO THE PROGRAMME ↑
+            </button>
+            <button
+              type="button"
+              onClick={replay}
+              data-cursor="link"
+              data-cursor-label="REWIND"
+            >
+              REPLAY THE OPENING
+            </button>
+          </div>
         </div>
       </div>
     </section>

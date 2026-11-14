@@ -84,13 +84,6 @@ export type TimelineEvent = {
   source?: { label: string; href: string };
 };
 
-export type HomeChapter = {
-  id: string;
-  number: string;
-  label: string;
-  title: string;
-};
-
 export type NavLink = {
   label: string;
   href: string;

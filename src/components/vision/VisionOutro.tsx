@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { homeCopy, painterPoints } from "@/data/exhibition";
 import { photographs } from "@/data/photographs";
 
 /**
@@ -16,6 +17,7 @@ const ROWS = [
 ];
 
 export default function VisionOutro() {
+  const painter = homeCopy.painter;
   const perRow = Math.ceil(photographs.length / ROWS.length);
   const rows = ROWS.map((spec, index) => {
     const slice = photographs.slice(index * perRow, (index + 1) * perRow);
@@ -77,6 +79,39 @@ export default function VisionOutro() {
             回到作品集
           </Link>
         </div>
+
+        <section
+          className="voutro__painter"
+          aria-labelledby="voutro-painter-title"
+        >
+          <div className="voutro__painter-head">
+            <span className="eyebrow" lang="en">
+              A PAINTER&apos;S EYE
+            </span>
+            <h3 id="voutro-painter-title" className="display" lang="en">
+              PAINTING FIRST,
+              <br />
+              <em>PHOTOGRAPHY SECOND.</em>
+            </h3>
+            <p className="voutro__painter-lede">{painter.standfirst}</p>
+          </div>
+
+          <div className="voutro__painter-body">
+            {painter.paragraphs.slice(0, 2).map((paragraph) => (
+              <p key={paragraph.slice(0, 12)}>{paragraph}</p>
+            ))}
+            <p className="voutro__painter-note">{painter.note}</p>
+          </div>
+
+          <dl className="voutro__painter-points">
+            {painterPoints.map((point) => (
+              <div key={point.label}>
+                <dt>{point.label}</dt>
+                <dd>{point.body}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </div>
     </section>
   );

@@ -5,7 +5,7 @@
    --------------------------------------------------------------------------
    One cascade, ordered by scope:
 
-     tokens → base → chrome → scenes → pages
+     tokens → base → chrome → pages
        → camera (desk companion + darkroom)
        → viewfinder (capture game HUD)
        → intro (opening sequence)
@@ -13,6 +13,7 @@
    Route-only sheets are imported by their own page instead, so they ship
    with that route and nobody else pays for them:
 
+     home.css   → app/page.tsx
      vision.css → app/vision/page.tsx
      lamp.css   → app/life/page.tsx
 
@@ -25,7 +26,6 @@
 @import "../styles/tokens.css";
 @import "../styles/base.css";
 @import "../styles/chrome.css";
-@import "../styles/scenes.css";
 @import "../styles/pages.css";
 @import "../styles/camera.css";
 @import "../styles/viewfinder.css";

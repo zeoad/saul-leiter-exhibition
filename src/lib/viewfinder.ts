@@ -5,6 +5,10 @@
  */
 
 export const FOUND_KEY = "saul-leiter:viewfinder:found:v1";
+/** First-visit invitation beside the masthead; dismissed once opened. */
+export const HINT_KEY = "saul-leiter:viewfinder:hint:v1";
+/** The three-step guide; "不再显示" persists this flag. */
+export const GUIDE_KEY = "saul-leiter:viewfinder:guide:v1";
 export const PROGRESS_EVENT = "viewfinder:progress";
 export const OPEN_EVENT = "viewfinder:open";
 

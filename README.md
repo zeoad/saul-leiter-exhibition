@@ -14,13 +14,13 @@ be compiled on a Linux server and served from a plain directory.
 
 ## 1. What this is
 
-A five-page digital exhibition with a cinematic cover, eleven home chapters,
-sixteen catalogued photographs, a four-chapter visual essay, a sourced
-biography, and a searchable archive.
+A five-page digital exhibition with a cinematic cover, a three-screen
+programme, sixteen catalogued photographs, a four-chapter visual essay,
+a sourced biography, and a searchable archive.
 
 | Route | Page | Content |
 | --- | --- | --- |
-| `/` | Exhibition | 11 chapters: cover, statement, New York, colour, glass, weather, ordinary, painting, selected works, life, closing |
+| `/` | Exhibition | 3 screens: cover → programme (four doors) → closing |
 | `/work/` | The Work | 16 plates, six-category filter, masonry gallery, PhotoSwipe lightbox |
 | `/work/[slug]/` | Plate record | 16 statically generated detail pages with source, credit, rights and prev/next |
 | `/vision/` | The Vision | 4 chapters: colour, obstruction, rain & snow, the ordinary |
@@ -65,8 +65,8 @@ the structured directories below; no feature was removed.
 src/
 ├── app/
 │   ├── layout.tsx            # fonts, metadata, providers, header/footer
-│   ├── page.tsx              # 11 home chapters + JSON-LD
-│   ├── globals.css           # design system + composition styles
+│   ├── page.tsx              # cover, programme, closing + JSON-LD
+│   ├── globals.css           # design system + shared composition styles
 │   ├── work/page.tsx         # gallery
 │   ├── work/[slug]/page.tsx  # SSG plate records
 │   ├── vision/page.tsx
@@ -77,8 +77,8 @@ src/
 │   ├── not-found.tsx
 │   └── icon.svg
 ├── components/
-│   ├── layout/               # Header, Footer, ChapterRail
-│   ├── home/                 # 11 section components
+│   ├── layout/               # Header, Footer, ChapterRail (room rail)
+│   ├── home/                 # Cover, Programme, Closing
 │   ├── gallery/              # WorkGallery, ArchiveExplorer, ArtworkLightbox
 │   ├── animation/            # SmoothScroll (Lenis), ScrollMotion (GSAP)
 │   └── ui/                   # Figure, PlateFigure, SectionHeading, PageHero…
@@ -242,7 +242,7 @@ Optional tooling (no npm packages required):
 ```bash
 npm run screenshots -- --path / --name home --full
 npm run screenshots -- --path / --width 390 --height 844 --name home-mobile --full
-npm run screenshots -- --path / --name home --sections "#cover,#color,#closing"
+npm run screenshots -- --path / --name home --sections "#cover,#programme,#closing"
 ```
 
 `scripts/screenshot.mjs` drives headless Chrome over the DevTools Protocol and
