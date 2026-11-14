@@ -2,13 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import PageHero from "@/components/ui/PageHero";
-import LifeTrack from "@/components/life/LifeTrack";
-import {
-  lifeFacts,
-  publications,
-  sources,
-} from "@/data/timeline";
+import LifeRoom from "@/components/life/LifeRoom";
+import { lifeFacts, publications, sources } from "@/data/timeline";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -20,34 +15,8 @@ export const metadata: Metadata = createPageMetadata({
 
 export default function LifePage() {
   return (
-    <>
-      <PageHero
-        kicker="THE LIFE / 03"
-        topRight="1923 — 2013 · PITTSBURGH / NEW YORK"
-        bg="/images/portraits/leiter-portrait.webp"
-        bgAlt="索尔·雷特肖像，约 1950 年代。"
-        position="50% 24%"
-        title={
-          <>
-            A LIFE
-            <br />
-            IN <em>FRAGMENTS.</em>
-          </>
-        }
-        lead="他并不是一个被时代忽略的天才，也不是一个刻意隐退的怪人。他只是一个愿意把大部分时间用在观看上的人——而这，恰好需要一生的时间。"
-        aside={
-          <>
-            <span>89 YEARS / ONE CITY</span>
-            <span>PAINTER · PHOTOGRAPHER</span>
-            <span>1923 · PITTSBURGH</span>
-            <span>2013 · NEW YORK</span>
-          </>
-        }
-      />
-
-      <LifeTrack />
-
-      <section className="life-essay tone-paper">
+    <LifeRoom>
+      <section className="life-essay">
         <div className="wrap life-essay__grid">
           <div className="life-essay__portrait">
             <div className="plate__frame" style={{ aspectRatio: "4 / 5" }}>
@@ -114,7 +83,7 @@ export default function LifePage() {
         </div>
       </section>
 
-      <section className="life-notes tone-dark" aria-labelledby="publications-title">
+      <section className="life-notes" aria-labelledby="publications-title">
         <div className="wrap">
           <header className="life-notes__head">
             <div>
@@ -154,7 +123,7 @@ export default function LifePage() {
         </div>
       </section>
 
-      <section className="life-sources tone-paper">
+      <section className="life-sources">
         <div className="wrap life-sources__grid">
           <div>
             <span className="eyebrow" lang="en">
@@ -175,11 +144,7 @@ export default function LifePage() {
           <ul className="life-sources__list">
             {sources.map((source) => (
               <li key={source.href}>
-                <a
-                  href={source.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
+                <a href={source.href} target="_blank" rel="noreferrer noopener">
                   <span className="life-sources__label" lang="en">
                     {source.label}
                   </span>
@@ -192,7 +157,7 @@ export default function LifePage() {
         </div>
       </section>
 
-      <section className="page-outro tone-dark">
+      <section className="page-outro">
         <div className="wrap page-outro__inner">
           <span className="eyebrow" lang="en">
             A LASTING VISION
@@ -216,6 +181,6 @@ export default function LifePage() {
           </div>
         </div>
       </section>
-    </>
+    </LifeRoom>
   );
 }

@@ -301,6 +301,19 @@ html.has-cursor [data-cursor] {
   cursor: none;
 }
 
+/* The lightbox paints its own backdrop above the custom ring, so hand the
+   native cursor back while a print is open — otherwise it vanishes. */
+html.lightbox-open,
+html.lightbox-open a,
+html.lightbox-open button,
+html.lightbox-open [data-cursor] {
+  cursor: auto;
+}
+
+html.lightbox-open .cursor {
+  display: none;
+}
+
 @media (hover: none), (pointer: coarse) {
   .cursor {
     display: none !important;

@@ -51,7 +51,19 @@ export default function ArtworkLightbox() {
 
     lightbox.init();
 
+    const onOpen = () => {
+      document.documentElement.classList.add("lightbox-open");
+    };
+
+    const onClose = () => {
+      document.documentElement.classList.remove("lightbox-open");
+    };
+
+    lightbox.on("beforeOpen", onOpen);
+    lightbox.on("close", onClose);
+
     return () => {
+      document.documentElement.classList.remove("lightbox-open");
       lightbox.destroy();
     };
   }, []);

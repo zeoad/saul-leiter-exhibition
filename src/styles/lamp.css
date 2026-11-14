@@ -1,0 +1,871 @@
+/* ==========================================================================
+   A QUIET GAZE — 08 · THE LAMP
+   /life is a single room that never scrolls. A pendant lamp hangs from the
+   ceiling; the beam and the lamp share one rotating rig, so the light can
+   never drift off the shade. The beam lands on a pile of prints on the table
+   and the print it touches is the year on screen.
+   ========================================================================== */
+
+/* The page is one frame: no scrollbar, no footer under the room. */
+html.life-locked,
+html.life-locked body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.life-locked .site-footer,
+html.life-locked .little-camera {
+  display: none;
+}
+
+.liferoom {
+  --pivot: 62%;
+  --ceiling: 3%;
+  --table-h: 24svh;
+  --step: 110px;
+  --shift: 0px;
+  --swing: 0px;
+  --angle: 0deg;
+  --shade-y: 26%;
+  --shade-w: clamp(128px, 13vw, 190px);
+  --shade-h: calc(var(--shade-w) * 0.65);
+  --shade-mouth: calc(var(--shade-y) + var(--shade-h) * 0.9);
+
+  position: relative;
+  display: flex;
+  height: 100svh;
+  overflow: clip;
+  padding-block: calc(var(--header-h) + 1.5rem) clamp(0.9rem, 2.2vh, 1.6rem);
+  background:
+    radial-gradient(
+      130% 84% at var(--pivot) 6%,
+      #171910 0%,
+      #0b0c09 44%,
+      #050604 100%
+    );
+  color: var(--cream);
+}
+
+.liferoom__room {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* --- The rig: canopy, cord, shade, beam, all swinging from one pivot ------ */
+
+.liferoom__rig {
+  position: absolute;
+  left: var(--pivot);
+  top: var(--ceiling);
+  z-index: 1;
+  width: 1px;
+  height: calc(100% - var(--ceiling) - var(--table-h));
+  transform-origin: 50% 0;
+  rotate: var(--angle, 0deg);
+  will-change: rotate;
+}
+
+.liferoom__canopy {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 30px;
+  height: 9px;
+  translate: -50% -100%;
+  border-radius: 7px 7px 3px 3px;
+  background: linear-gradient(180deg, #46483b 0%, #2b2d23 54%, #16180f 100%);
+  box-shadow: 0 1px 0 rgba(255, 238, 208, 0.16);
+}
+
+.liferoom__cord {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: calc(var(--shade-y) + 4px);
+  translate: -50% 0;
+  background: linear-gradient(180deg, #3b3d31 0%, #2b2d23 42%, #13140d 100%);
+}
+
+/* The brass collar where the flex meets the shade. */
+.liferoom__cord::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 13px;
+  height: 7px;
+  translate: -50% 0;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(180deg, #4e5043 0%, #34362a 58%, #1d1f16 100%);
+  box-shadow: 0 1px 0 rgba(255, 234, 200, 0.22);
+}
+
+/* The shade is a drawn bell, not a cut polygon: a curved flare that keeps its
+   silhouette at any swing angle, a dark mouth, and one hot rim where the light
+   escapes. */
+.liferoom__lamp {
+  position: absolute;
+  left: 50%;
+  top: var(--shade-y);
+  width: var(--shade-w);
+  height: var(--shade-h);
+  translate: -50% 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.liferoom__lamp:focus-visible {
+  outline: 1px solid rgba(255, 226, 180, 0.55);
+  outline-offset: 10px;
+  border-radius: 40% 40% 12% 12% / 46% 46% 10% 10%;
+}
+
+.liferoom__shade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.55));
+  transition: filter 0.45s var(--ease-out);
+}
+
+.liferoom__lamp:hover .liferoom__shade,
+.liferoom__lamp:focus-visible .liferoom__shade {
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.55)) brightness(1.1);
+}
+
+.liferoom__bulb {
+  position: absolute;
+  left: 50%;
+  top: 87%;
+  width: 11px;
+  height: 11px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 40%,
+    #fffaf0 0%,
+    #ffe6bc 42%,
+    #ffcf98 66%,
+    rgba(255, 207, 152, 0) 100%
+  );
+  box-shadow:
+    0 0 26px 12px rgba(255, 208, 148, 0.5),
+    0 0 92px 44px rgba(255, 194, 128, 0.16);
+}
+
+
+
+/* --- The beam ------------------------------------------------------------- */
+
+.liferoom__beam {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--shade-mouth) - 6px);
+  bottom: -16%;
+  width: 116svh;
+  translate: -50% 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: lamp-on 1.5s var(--ease-out) 0.35s both;
+}
+
+@keyframes lamp-on {
+  0% {
+    opacity: 0;
+  }
+  16% {
+    opacity: 0.55;
+  }
+  22% {
+    opacity: 0.12;
+  }
+  34% {
+    opacity: 0.86;
+  }
+  40% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Conic gradients from the bulb: the edge of the light fades in angle, so
+   there is no polygon seam where the cone meets the dark. */
+.liferoom__cone {
+  position: absolute;
+  inset: 0;
+}
+
+.liferoom__cone--wide {
+  background: conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 128deg,
+    rgba(255, 224, 176, 0.08) 144deg,
+    rgba(255, 224, 176, 0.17) 160deg,
+    rgba(255, 226, 180, 0.27) 180deg,
+    rgba(255, 224, 176, 0.17) 200deg,
+    rgba(255, 224, 176, 0.08) 216deg,
+    transparent 232deg
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.98) 52%,
+    rgba(0, 0, 0, 0.9) 78%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
+}
+
+.liferoom__cone--core {
+  background: conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 144deg,
+    rgba(255, 240, 208, 0.13) 160deg,
+    rgba(255, 242, 214, 0.3) 172deg,
+    rgba(255, 244, 220, 0.5) 180deg,
+    rgba(255, 242, 214, 0.3) 188deg,
+    rgba(255, 240, 208, 0.13) 200deg,
+    transparent 216deg
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.96) 54%,
+    rgba(0, 0, 0, 0.84) 80%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+/* Light bouncing back off the wall behind the lamp. */
+.liferoom__spill {
+  position: absolute;
+  left: var(--pivot);
+  top: 0;
+  z-index: 0;
+  width: 92vw;
+  height: 62vh;
+  translate: -50% 0;
+  background: radial-gradient(
+    50% 50% at 50% 0%,
+    rgba(255, 214, 158, 0.16) 0%,
+    rgba(255, 206, 146, 0.05) 44%,
+    rgba(255, 206, 146, 0) 72%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.liferoom__mote {
+  position: absolute;
+  top: 8%;
+  left: var(--mote-x, 50%);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(255, 240, 214, 0.9);
+  opacity: 0;
+  animation: mote-fall var(--mote-dur, 13s) linear var(--mote-delay, 0s) infinite;
+}
+
+@keyframes mote-fall {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  18% {
+    opacity: 0.6;
+  }
+  72% {
+    opacity: 0.32;
+  }
+  100% {
+    opacity: 0;
+    translate: 18px 36svh;
+  }
+}
+
+/* --- Table and pool ------------------------------------------------------- */
+
+.liferoom__table {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: var(--table-h);
+  border-top: 1px solid rgba(255, 236, 206, 0.11);
+  background: linear-gradient(
+      180deg,
+      rgba(255, 232, 198, 0.07) 0%,
+      rgba(255, 232, 198, 0) 30%
+    ),
+    linear-gradient(180deg, #14150f 0%, #0c0d09 34%, #080906 100%);
+}
+
+.liferoom__pool {
+  position: absolute;
+  left: calc(var(--pivot) + var(--swing));
+  top: calc(100% - var(--table-h));
+  z-index: 2;
+  width: min(58vw, 760px);
+  height: clamp(100px, 11vw, 190px);
+  translate: -50% -40%;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 228, 182, 0.5) 0%,
+    rgba(255, 212, 154, 0.2) 42%,
+    rgba(255, 205, 150, 0) 72%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* --- The prints ----------------------------------------------------------- */
+
+/* The prints are one long line lying on the table; the line rides with the
+   light, so the beam always has the current print directly beneath it. */
+.liferoom__prints {
+  position: absolute;
+  left: calc(var(--pivot) + var(--swing));
+  bottom: calc(var(--table-h) - 2px);
+  z-index: 3;
+  width: 0;
+  height: 0;
+}
+
+.liferoom__print {
+  --tx: calc(var(--step) * var(--i) - var(--shift, 0px));
+
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: clamp(132px, 11vw, 158px);
+  margin: 0;
+  translate: calc(-50% + var(--tx)) var(--jy, 0px);
+  rotate: var(--jr, 0deg);
+  scale: var(--j, 1);
+  opacity: 0.9;
+  filter: brightness(0.42) saturate(0.86) contrast(0.96);
+  transition:
+    translate 0.42s var(--ease-out),
+    rotate 0.42s var(--ease-out),
+    scale 0.42s var(--ease-out),
+    opacity 0.4s linear,
+    filter 0.4s linear;
+  will-change: translate, rotate, scale;
+}
+
+.liferoom__print[data-lit="true"] {
+  z-index: 20;
+  translate: calc(-50% + var(--tx)) calc(var(--jy, 0px) - 34px);
+  rotate: 0deg;
+  scale: calc(var(--j, 1) * 1.34);
+  opacity: 1;
+  filter: brightness(1.06) saturate(1) contrast(1);
+}
+
+.liferoom__mount {
+  position: relative;
+  display: block;
+  padding: 6.5% 6.5% 15%;
+  background: linear-gradient(170deg, #ece3d3 0%, #ded3bf 62%, #d0c4ad 100%);
+  box-shadow:
+    0 18px 30px -20px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.14) inset;
+  transition: box-shadow 0.45s var(--ease-out);
+}
+
+.liferoom__print[data-lit="true"] .liferoom__mount {
+  box-shadow:
+    0 34px 54px -26px rgba(0, 0, 0, 0.98),
+    0 0 0 1px rgba(255, 232, 196, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.liferoom__frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: #0b0d09;
+}
+
+.liferoom__emulsion {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      116deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0) 34%
+    ),
+    radial-gradient(
+      120% 90% at 78% 12%,
+      rgba(255, 238, 208, 0.22) 0%,
+      rgba(255, 238, 208, 0) 58%
+    );
+  mix-blend-mode: screen;
+}
+
+.liferoom__stamp {
+  position: absolute;
+  left: 7%;
+  bottom: 4.5%;
+  font-family: var(--font-mono);
+  font-size: 0.4375rem;
+  letter-spacing: 0.22em;
+  color: #7a6f5c;
+  white-space: nowrap;
+}
+
+/* --- Copy ----------------------------------------------------------------- */
+
+.liferoom__inner {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(1rem, 3vh, 2rem);
+  width: 100%;
+  padding-bottom: 0;
+  /* The copy sits above the room: let the pointer reach the lamp. */
+  pointer-events: none;
+}
+
+.liferoom__top,
+.liferoom__copy,
+.liferoom__foot {
+  pointer-events: auto;
+}
+
+.liferoom__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.liferoom__span {
+  color: var(--ash-light);
+}
+
+.liferoom__copy {
+  display: flex;
+  flex-direction: column;
+  max-width: 20rem;
+  pointer-events: none;
+}
+
+.liferoom__title {
+  font-family: var(--ff-display);
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: rgba(236, 230, 217, 0.55);
+}
+
+.liferoom__title em {
+  color: var(--red-soft);
+}
+
+.liferoom__lede {
+  max-width: 19rem;
+  margin-top: clamp(0.6rem, 1.4vh, 1rem);
+  font-family: var(--ff-cn);
+  font-size: 0.8125rem;
+  line-height: 1.9;
+  color: rgba(236, 230, 217, 0.52);
+}
+
+.liferoom__readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.9rem;
+  margin-top: clamp(1.2rem, 3.4vh, 2.6rem);
+  animation: life-in 0.5s var(--ease-out) both;
+}
+
+@keyframes life-in {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.liferoom__year {
+  font-family: var(--ff-display);
+  font-size: clamp(3.4rem, 6.4vw, 5.6rem);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.liferoom__count {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
+  color: var(--red-soft);
+}
+
+.liferoom__event {
+  flex-basis: 100%;
+  margin-top: 0.9rem;
+  font-family: var(--ff-cn);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--cream);
+}
+
+.liferoom__event-en {
+  flex-basis: 100%;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ash-light);
+}
+
+.liferoom__body {
+  flex-basis: 100%;
+  display: -webkit-box;
+  margin-top: 0.85rem;
+  overflow: hidden;
+  font-family: var(--ff-cn);
+  font-size: 0.875rem;
+  line-height: 1.95;
+  color: rgba(236, 230, 217, 0.72);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+/* --- Foot: the auto switch + the long read -------------------------------- */
+
+.liferoom__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.liferoom__auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(236, 230, 217, 0.16);
+  background: rgba(236, 230, 217, 0.02);
+  color: var(--ash-light);
+  font-family: var(--font-mono);
+  font-size: 0.46875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.liferoom__auto svg {
+  width: 11px;
+  height: 11px;
+}
+
+.liferoom__auto-cn {
+  font-family: var(--ff-cn);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--ash);
+  transition: color 0.3s var(--ease-out);
+}
+
+.liferoom__auto:hover,
+.liferoom__auto:focus-visible {
+  color: var(--cream);
+  border-color: rgba(236, 230, 217, 0.38);
+  background: rgba(236, 230, 217, 0.07);
+}
+
+.liferoom__auto:hover .liferoom__auto-cn,
+.liferoom__auto:focus-visible .liferoom__auto-cn {
+  color: var(--ash-light);
+}
+
+.liferoom__auto[aria-pressed="true"] {
+  color: var(--red-soft);
+  border-color: rgba(196, 92, 78, 0.42);
+  background: rgba(196, 92, 78, 0.07);
+}
+
+.liferoom__read {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid rgba(236, 230, 217, 0.18);
+  background: rgba(236, 230, 217, 0.03);
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.35s var(--ease-out),
+    background-color 0.35s var(--ease-out);
+}
+
+.liferoom__read:hover,
+.liferoom__read:focus-visible {
+  border-color: rgba(236, 230, 217, 0.42);
+  background: rgba(236, 230, 217, 0.07);
+}
+
+.liferoom__read-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.24em;
+}
+
+.liferoom__read-sub {
+  font-family: var(--ff-cn);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--ash-light);
+}
+
+.liferoom__read-arrow {
+  color: var(--red-soft);
+}
+
+/* ==========================================================================
+   THE LONG READ — a sheet pulled up from under the table
+   ========================================================================== */
+
+.lifedrawer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.lifedrawer[data-open="true"] {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.lifedrawer__sheet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  translate: 0 101%;
+  transition: translate 0.78s var(--ease-cinema);
+  box-shadow: 0 -40px 90px rgba(0, 0, 0, 0.55);
+}
+
+.lifedrawer[data-open="true"] .lifedrawer__sheet {
+  translate: 0 0;
+}
+
+.lifedrawer__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 0.75rem var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.lifedrawer__kicker {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
+  color: var(--ash);
+}
+
+.lifedrawer__close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.3s var(--ease-out);
+}
+
+.lifedrawer__close span {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+}
+
+.lifedrawer__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.lifedrawer__close:hover {
+  background: rgba(27, 28, 25, 0.06);
+}
+
+.lifedrawer__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+/* Inside the sheet everything is paper: the dark bands of the old page are
+   dropped and the type goes back to ink. */
+.lifedrawer__scroll .life-essay,
+.lifedrawer__scroll .life-notes,
+.lifedrawer__scroll .life-sources,
+.lifedrawer__scroll .page-outro {
+  padding-block: clamp(2.25rem, 6vh, 4rem);
+  background: transparent;
+  color: var(--ink);
+}
+
+.lifedrawer__scroll .life-essay__portrait {
+  position: static;
+}
+
+.lifedrawer__scroll .life-notes__head h2 em,
+.lifedrawer__scroll .page-outro__inner h2 em {
+  color: var(--red);
+}
+
+.lifedrawer__scroll .page-outro {
+  border-top: 1px solid var(--line);
+}
+
+.lifedrawer__scroll .life-notes {
+  border-top: 1px solid var(--line);
+}
+
+.lifedrawer__scroll .life-sources {
+  border-top: 1px solid var(--line);
+}
+
+/* --- Small screens -------------------------------------------------------- */
+
+@media (max-width: 767px) {
+  .liferoom {
+    --pivot: 74%;
+    --table-h: 27svh;
+    --shade-y: 15%;
+    --shade-w: 96px;
+    padding-block: calc(var(--header-h) + 0.75rem) 0;
+  }
+
+  .liferoom__beam {
+    width: 140svh;
+  }
+
+  /* On a phone the beam is kept from leaving the frame; the line of prints
+     still rides under it. */
+  .liferoom__prints,
+  .liferoom__pool {
+    left: clamp(
+      132px,
+      calc(var(--pivot) + var(--swing)),
+      calc(100% - 132px)
+    );
+  }
+
+  .liferoom__print {
+    width: 44vw;
+  }
+
+  .liferoom__inner {
+    justify-content: flex-start;
+    gap: 0;
+    padding-bottom: 0;
+  }
+
+  .liferoom__span {
+    display: none;
+  }
+
+  .liferoom__copy {
+    margin-top: clamp(0.4rem, 2.2vh, 1.4rem);
+    max-width: 100%;
+  }
+
+  .liferoom__lede {
+    display: none;
+  }
+
+  .liferoom__readout {
+    margin-top: 1rem;
+  }
+
+  .liferoom__year {
+    font-size: clamp(3rem, 15vw, 4.4rem);
+  }
+
+  .liferoom__body {
+    font-size: 0.8125rem;
+    line-height: 1.9;
+    -webkit-line-clamp: 3;
+  }
+
+  .liferoom__auto {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .liferoom__auto-cn {
+    display: none;
+  }
+
+  .liferoom__foot {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: 0.9rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .lifedrawer__kicker {
+    font-size: 0.4375rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liferoom__print,
+  .lifedrawer__sheet {
+    transition: none;
+  }
+}

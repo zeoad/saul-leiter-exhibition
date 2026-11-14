@@ -1,0 +1,83 @@
+import type { CSSProperties } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
+import { photographs } from "@/data/photographs";
+
+/**
+ * The last frame: the whole register runs past the wall — three strips
+ * drifting in opposite directions, the way a drying rack of prints moves
+ * when the fan is left on.
+ */
+const ROWS = [
+  { duration: "96s", direction: "normal", offset: "0s" },
+  { duration: "78s", direction: "reverse", offset: "-24s" },
+  { duration: "116s", direction: "normal", offset: "-52s" },
+];
+
+export default function VisionOutro() {
+  const perRow = Math.ceil(photographs.length / ROWS.length);
+  const rows = ROWS.map((spec, index) => {
+    const slice = photographs.slice(index * perRow, (index + 1) * perRow);
+    return { ...spec, frames: [...slice, ...slice] };
+  });
+
+  return (
+    <section className="voutro tone-dark" aria-labelledby="voutro-title">
+      <div className="voutro__reel" aria-hidden="true">
+        {rows.map((row, rowIndex) => (
+          <div className="voutro__row" key={rowIndex}>
+            <div
+              className="voutro__track"
+              style={
+                {
+                  "--reel-dur": row.duration,
+                  "--reel-dir": row.direction,
+                  "--reel-offset": row.offset,
+                } as CSSProperties
+              }
+            >
+              {row.frames.map((photo, index) => (
+                <span className="voutro__frame" key={`${photo.slug}-${index}`}>
+                  <Image
+                    src={photo.image.src}
+                    alt=""
+                    fill
+                    sizes="18vw"
+                    className="voutro__img"
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="wrap voutro__inner">
+        <span className="eyebrow" lang="en">
+          THE LAST WORD
+        </span>
+
+        <h2 id="voutro-title" className="display" lang="en">
+          BEAUTY IS
+          <br />
+          <em>EVERYWHERE.</em>
+        </h2>
+
+        <p>
+          需要的不是更好的相机，而是更慢的眼睛。当你看完这四个章节，再回到街上，
+          也许会发现那些原本不存在的东西，一直都在那里。
+        </p>
+
+        <div className="voutro__actions">
+          <Link href="/life/" className="btn">
+            继续了解他的生平
+          </Link>
+          <Link href="/work/" className="btn">
+            回到作品集
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
