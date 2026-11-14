@@ -1,0 +1,76 @@
+name: Visual baseline
+
+# The pixel gate is only meaningful when the baselines come from the same
+# machine, browser and fonts as the gate itself. Run this on the CI image
+# whenever a design change is intentional: it regenerates .visual/baseline
+# and, unless told otherwise, commits the result back to this branch.
+#
+# Never run `npm run visual:update` on a developer machine for baselines that
+# CI will compare against — Windows/macOS rasterise the fallback fonts
+# differently, so the gate would go red on every push.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Commit the regenerated baselines back to this branch
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+env:
+  NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://a-quiet-gaze.example' }}
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Chinese copy falls back to Noto Serif SC; pin the package so the
+      # glyph rasterisation matches the gate job exactly.
+      - name: Install CJK fonts
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
+
+      - run: npm ci
+
+      - name: Generate responsive image variants + manifest
+        run: node scripts/responsive-images.mjs
+
+      - run: npm run build
+
+      - name: Resolve Chrome binary
+        run: |
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+          "$CHROME_PATH" --version
+
+      - name: Regenerate baselines
+        run: npm run visual:update
+
+      - name: Upload baselines
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baseline
+          path: .visual/baseline/
+          retention-days: 30
+
+      - name: Commit baselines
+        if: inputs.commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .visual/baseline
+          if git diff --cached --quiet; then
+            echo "Baselines unchanged."
+            exit 0
+          fi
+          git commit -m "chore(visual): regenerate baselines on the CI image"
+          git push origin "HEAD:${{ github.ref_name }}"

@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import {
   categoryToSlug,
@@ -124,86 +122,77 @@ export default function VisionAct({
     };
   }, []);
 
-  /* --- The print drifts inside its gate --------------------------------- */
+  /* --- The print drifts inside its gate ---------------------------------
+     One CSS variable carries the scroll progress; the transforms live in
+     vision.css. Cheaper than a tween engine for three transforms, and it
+     keeps this route free of GSAP entirely. */
   useEffect(() => {
     const screen = screenRef.current;
-    const media = mediaRef.current;
-    if (!screen || !media) return;
+    if (!screen) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+    if (reduce) {
+      screen.classList.add("is-in");
+      return;
+    }
 
-    gsap.registerPlugin(ScrollTrigger);
+    /* Hold the furniture off-frame before it can be seen; `is-in` then lets
+       it rise in. Without JS this class never lands and the copy is visible. */
+    screen.classList.add("is-armed");
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        media,
-        { scale: 1.16, yPercent: -2.5 },
-        {
-          scale: 1.02,
-          yPercent: 2.5,
-          ease: "none",
-          scrollTrigger: {
-            trigger: screen,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.6,
-          },
-        }
-      );
+    let frame = 0;
+    let target = 0;
+    let value = 0;
 
-      const word = screen.querySelector<HTMLElement>(".vact__word");
-      if (word) {
-        gsap.fromTo(
-          word,
-          { xPercent: -4 },
-          {
-            xPercent: 7,
-            ease: "none",
-            scrollTrigger: {
-              trigger: screen,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 0.8,
-            },
-          }
-        );
+    const measure = () => {
+      const rect = screen.getBoundingClientRect();
+      const span = rect.height + window.innerHeight;
+      const raw = span > 0 ? (window.innerHeight - rect.top) / span : 0;
+      target = raw < 0 ? 0 : raw > 1 ? 1 : raw;
+    };
+
+    const tick = () => {
+      const delta = target - value;
+      if (Math.abs(delta) < 0.0015) {
+        value = target;
+        screen.style.setProperty("--act-p", value.toFixed(3));
+        frame = 0;
+        return;
       }
 
-      const num = screen.querySelector<HTMLElement>(".vact__num");
-      if (num) {
-        gsap.fromTo(
-          num,
-          { yPercent: 5 },
-          {
-            yPercent: -9,
-            ease: "none",
-            scrollTrigger: {
-              trigger: screen,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 0.8,
-            },
-          }
-        );
-      }
+      value += delta * 0.16;
+      screen.style.setProperty("--act-p", value.toFixed(3));
+      frame = window.requestAnimationFrame(tick);
+    };
 
-      gsap.from(
-        screen.querySelectorAll<HTMLElement>(
-          ".vact__hud, .vact__num, .vact__word, .vact__aside"
-        ),
-        {
-          y: 46,
-          opacity: 0,
-          duration: 1.1,
-          stagger: 0.09,
-          ease: "power3.out",
-          scrollTrigger: { trigger: screen, start: "top 82%", once: true },
-        }
-      );
-    }, screen);
+    const onScroll = () => {
+      measure();
+      if (!frame) frame = window.requestAnimationFrame(tick);
+    };
 
-    return () => ctx.revert();
+    measure();
+    value = target;
+    screen.style.setProperty("--act-p", value.toFixed(3));
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        screen.classList.add("is-in");
+        io.disconnect();
+      },
+      { rootMargin: "0px 0px -18% 0px" }
+    );
+    io.observe(screen);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   /* --- Rain and snow fall across the print ------------------------------ */

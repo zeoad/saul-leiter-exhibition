@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import gsap from "gsap";
 
 import { scrollToTarget } from "@/lib/lenis";
 import type { Photograph } from "@/types";
@@ -27,36 +26,51 @@ export default function VisionHero({ photo }: { photo: Photograph }) {
   const mediaRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
-  /* Pointer parallax — the wall breathes, the title drifts. */
+  /* Pointer parallax — the wall breathes, the title drifts.
+     Two normalised variables on the section; the offsets live in vision.css. */
   useEffect(() => {
     const root = rootRef.current;
-    const media = mediaRef.current;
-    const title = titleRef.current;
-    if (!root || !media || !title) return;
+    if (!root) return;
 
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduce) return;
 
-    const mediaX = gsap.quickTo(media, "x", { duration: 1.2, ease: "power3" });
-    const mediaY = gsap.quickTo(media, "y", { duration: 1.2, ease: "power3" });
-    const titleX = gsap.quickTo(title, "x", { duration: 1.5, ease: "power3" });
-    const titleY = gsap.quickTo(title, "y", { duration: 1.5, ease: "power3" });
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    let tx = 0;
+    let ty = 0;
+
+    const paint = () => {
+      const dx = tx - x;
+      const dy = ty - y;
+
+      if (Math.abs(dx) < 0.0008 && Math.abs(dy) < 0.0008) {
+        x = tx;
+        y = ty;
+        frame = 0;
+      } else {
+        x += dx * 0.075;
+        y += dy * 0.075;
+        frame = window.requestAnimationFrame(paint);
+      }
+
+      root.style.setProperty("--hx", x.toFixed(4));
+      root.style.setProperty("--hy", y.toFixed(4));
+    };
 
     const onMove = (event: PointerEvent) => {
-      const nx = event.clientX / window.innerWidth - 0.5;
-      const ny = event.clientY / window.innerHeight - 0.5;
-
-      mediaX(nx * -26);
-      mediaY(ny * -20);
-      titleX(nx * 12);
-      titleY(ny * 9);
+      if (event.pointerType !== "mouse") return;
+      tx = event.clientX / window.innerWidth - 0.5;
+      ty = event.clientY / window.innerHeight - 0.5;
+      if (!frame) frame = window.requestAnimationFrame(paint);
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => {
       window.removeEventListener("pointermove", onMove);
-      gsap.killTweensOf([media, title]);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 

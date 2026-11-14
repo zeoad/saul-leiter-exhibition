@@ -10,6 +10,12 @@
        → viewfinder (capture game HUD)
        → intro (opening sequence)
 
+   Route-only sheets are imported by their own page instead, so they ship
+   with that route and nobody else pays for them:
+
+     vision.css → app/vision/page.tsx
+     lamp.css   → app/life/page.tsx
+
    The three interactive sheets keep their own files because they own
    full-screen overlays, but they read the same tokens as everything else.
    There is no second design language left: the former "legacy" sheets were
@@ -21,8 +27,6 @@
 @import "../styles/chrome.css";
 @import "../styles/scenes.css";
 @import "../styles/pages.css";
-@import "../styles/vision.css";
-@import "../styles/lamp.css";
 @import "../styles/camera.css";
 @import "../styles/viewfinder.css";
 @import "../styles/intro.css";

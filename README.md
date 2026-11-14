@@ -392,5 +392,14 @@ dynamic server rendering. All 16 plate routes are generated with
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
 `feat:` / `fix:` / `perf:` / `ci:` / `docs:` / `chore:`, optionally scoped
-(e.g. `fix(gallery): …`). CI must be green (`lint`, `typecheck`, `build`)
-before merging; review the `page-screenshots` artifact on visual changes.
+(e.g. `fix(gallery): …`). CI must be green (`lint`, `typecheck`, `build`,
+`visual`) before merging; review the `visual-regression` artifact on visual
+changes.
+
+The pixel baselines in `.visual/baseline` are captured on the Ubuntu CI image,
+with the same Chrome and the same CJK font package the gate runs against. When
+a visual change is intentional, regenerate them with the **Visual baseline**
+workflow (`workflow_dispatch`, see `.github/workflows/visual-baseline.yml`)
+rather than running `npm run visual:update` locally: a Windows or macOS capture
+rasterises the fallback Chinese faces differently and would turn the gate red
+on the next push.

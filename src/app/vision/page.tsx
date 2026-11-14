@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fragment } from "react";
 
+import "@/styles/vision.css";
 import VisionAct from "@/components/vision/VisionAct";
 import VisionChangeover from "@/components/vision/VisionChangeover";
 import VisionHero from "@/components/vision/VisionHero";

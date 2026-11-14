@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import "@/styles/lamp.css";
 import LifeRoom from "@/components/life/LifeRoom";
 import { lifeFacts, publications, sources } from "@/data/timeline";
 import { createPageMetadata } from "@/lib/metadata";
